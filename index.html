@@ -424,23 +424,21 @@
 
   compressBtn.addEventListener('click', async () => {
     if(!currentFile){ return; }
+    if(typeof SharedArrayBuffer === 'undefined'){
+      showStatus('הדחיסה לא זמינה באירוח הנוכחי (GitHub Pages) — חסרה תמיכת דפדפן שדורשת הגדרות שרת מיוחדות. אפשר לדלג על דחיסה ולנסות ישירות "יצירת כתוביות", או לעבור לאירוח אחר בהמשך.', 'err');
+      return;
+    }
     compressBtn.disabled = true;
     progressTrack.classList.add('show');
     progressFill.style.width = '2%';
     compressDone.classList.remove('show');
 
     try{
-      if(!ffmpegInstance){
-        showStatus('טוען מנוע דחיסה (פעם ראשונה בלבד, יכול לקחת כדקה)...');
-        ffmpegInstance = FFmpeg.createFFmpeg({
-          log: false,
-          corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js',
-          progress: ({ ratio }) => {
-            if(ratio >= 0 && ratio <= 1) progressFill.style.width = (ratio*100).toFixed(0) + '%';
-          }
-        });
-        await ffmpegInstance.load();
-      }
+      showStatus('טוען מנוע דחיסה (פעם ראשונה בלבד, יכול לקחת כדקה)...');
+      const ff = await ensureFfmpegLoaded();
+      ffmpegInstance.setProgress && ffmpegInstance.setProgress(({ ratio }) => {
+        if(ratio >= 0 && ratio <= 1) progressFill.style.width = (ratio*100).toFixed(0) + '%';
+      });
 
       showStatus('מודד את משך הסרטון...');
       const duration = await getDuration(currentFile);
@@ -556,8 +554,8 @@
       const currentExt = (currentFile.name.split('.').pop() || '').toLowerCase();
       let uploadFile = currentFile;
       if(!SUPPORTED_EXT.includes(currentExt)){
-        showStatus('ממיר את הקובץ לפורמט נתמך...');
-        uploadFile = await convertToMp4(currentFile);
+        const safeName = currentFile.name.replace(/\.[^.]+$/, '') + '.mp4';
+        uploadFile = new File([currentFile], safeName, { type: 'video/mp4' });
       }
       formData.append('file', uploadFile);
       formData.append('model', 'whisper-1');
