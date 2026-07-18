@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>כתובית — יצירת כתוביות אוטומטית</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Rubik:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Rubik:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
   :root{
     --bg: #121309;
@@ -322,7 +322,7 @@
   <footer>STUDIO · TIMECODE 00:00:00:00</footer>
 </div>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js" crossorigin="anonymous"></script>
 <script>
   // sprockets decoration
   const sprocketsEl = document.getElementById('sprockets');
@@ -554,8 +554,13 @@
       const currentExt = (currentFile.name.split('.').pop() || '').toLowerCase();
       let uploadFile = currentFile;
       if(!SUPPORTED_EXT.includes(currentExt)){
-        const safeName = currentFile.name.replace(/\.[^.]+$/, '') + '.mp4';
-        uploadFile = new File([currentFile], safeName, { type: 'video/mp4' });
+        if(typeof SharedArrayBuffer === 'undefined'){
+          showStatus('הפורמט של הקובץ לא נתמך, וההמרה האוטומטית דורשת אירוח עם תמיכת SharedArrayBuffer (כמו Cloudflare Pages). ראה הסבר למעלה.', 'err');
+          generateBtn.disabled = false;
+          return;
+        }
+        showStatus('ממיר את הקובץ לפורמט נתמך...');
+        uploadFile = await convertToMp4(currentFile);
       }
       formData.append('file', uploadFile);
       formData.append('model', 'whisper-1');
