@@ -738,6 +738,45 @@
     return `${m}:${s}`;
   }
 
+  // Regroups Whisper's word-level timestamps into short, speech-paced
+  // caption chunks (TikTok/Reels-style) instead of its long default
+  // sentence segments — breaking on natural pauses, sentence punctuation,
+  // or once a chunk gets too long to stay a quick, punchy read.
+  function chunkWordsIntoCaptions(words){
+    const MAX_WORDS = 4;
+    const MAX_DURATION = 2.2;
+    const PAUSE_GAP = 0.35;
+    const chunks = [];
+    let cur = [];
+
+    function flush(){
+      if(cur.length){
+        chunks.push({
+          start: cur[0].start,
+          end: cur[cur.length - 1].end,
+          text: cur.map(w => w.word.trim()).join(' ').trim()
+        });
+        cur = [];
+      }
+    }
+
+    words.forEach(w => {
+      if(cur.length){
+        const prev = cur[cur.length - 1];
+        const gap = w.start - prev.end;
+        const duration = w.end - cur[0].start;
+        if(gap > PAUSE_GAP || duration > MAX_DURATION || cur.length >= MAX_WORDS){
+          flush();
+        }
+      }
+      cur.push(w);
+      if(/[.!?׃]$/.test(w.word.trim())) flush();
+    });
+    flush();
+
+    return chunks.filter(c => c.text.length > 0);
+  }
+
   function applyStyleToOverlay(){
     const overlay = document.querySelector('.caption-overlay');
     captionText.style.fontSize = captionStyle.fontSize + 'px';
@@ -961,6 +1000,8 @@
       formData.append('model', 'whisper-1');
       formData.append('language', 'he');
       formData.append('response_format', 'verbose_json');
+      formData.append('timestamp_granularities[]', 'word');
+      formData.append('timestamp_granularities[]', 'segment');
       const promptText = document.getElementById('promptText').value.trim();
       if(promptText){ formData.append('prompt', promptText); }
 
@@ -977,7 +1018,9 @@
       }
 
       const data = await res.json();
-      segments = (data.segments || []).map(s => ({ start: s.start, end: s.end, text: s.text.trim() }));
+      segments = (data.words && data.words.length)
+        ? chunkWordsIntoCaptions(data.words)
+        : (data.segments || []).map(s => ({ start: s.start, end: s.end, text: s.text.trim() }));
 
       if(segments.length === 0){
         showStatus('לא זוהה דיבור בסרטון.', 'err');
