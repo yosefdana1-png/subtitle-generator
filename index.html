@@ -79,7 +79,60 @@
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 16px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.16);
   }
+  .step{ position:relative; overflow:hidden; }
+  .step::before{
+    content:""; position:absolute; top:0; bottom:0; right:0; width:3px;
+    background: linear-gradient(180deg, var(--amber), var(--amber-dim));
+    opacity: .55;
+  }
+  .step-head{
+    display:flex; align-items:center; gap:10px; width:100%;
+    background:none; border:none; padding:0; margin:0;
+    color: var(--text); cursor:pointer; text-align:right;
+    font-family: 'Rubik', sans-serif;
+  }
+  .step-static-head{
+    display:flex; align-items:center; gap:10px; margin-bottom:16px;
+  }
+  .step-badge{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--amber); flex-shrink:0;
+    border: 1px solid var(--amber-dim); border-radius: 6px;
+    width: 26px; height: 26px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step-title{ font-size: 14.5px; font-weight: 500; flex-shrink:0; }
+  .step-summary{
+    font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+    color: var(--text-dim); flex:1; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    direction:ltr; text-align:right;
+  }
+  .step-check{ color: var(--green); font-size: 14px; flex-shrink:0; }
+  .chev{ color: var(--text-dim); font-size: 11px; flex-shrink:0; transition: transform .2s; }
+  [aria-expanded="true"] > .chev, [aria-expanded="true"] .chev{ transform: rotate(180deg); }
+  .step-body-wrap{
+    display:grid; grid-template-rows: 0fr;
+    transition: grid-template-rows .22s ease;
+  }
+  .step-body-wrap.expanded{ grid-template-rows: 1fr; }
+  .step-body-inner{ overflow:hidden; }
+  .step-body-wrap.expanded .step-body-inner{ padding-top: 18px; }
+  .settings-field{ margin-bottom: 18px; }
+  .settings-field:last-child{ margin-bottom: 0; }
+  .compress-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .mini-toggle{
+    display:flex; align-items:center; gap:6px;
+    background: var(--panel-2); border: 1px solid var(--edge);
+    color: var(--text-dim); font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px; padding: 6px 10px; border-radius: 6px;
+    cursor:pointer; width:auto; flex-shrink:0;
+  }
+  .mini-toggle:hover{ border-color: var(--amber-dim); }
   .label{
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
@@ -303,26 +356,43 @@
 
   <div class="sprockets" id="sprockets"></div>
 
-  <section>
-    <span class="label">מפתח API של OpenAI</span>
-    <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
-    <p class="hint">המפתח נשמר רק בזיכרון הדף הזה, לא מועבר לשום מקום חוץ מ-OpenAI, ונעלם ברגע שתסגור את הדף. אפשר ליצור מפתח בכתובת <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></p>
+  <section class="step" id="settingsStep">
+    <button class="step-head" id="settingsHead" type="button" aria-expanded="true">
+      <span class="step-badge">01</span>
+      <span class="step-title">הגדרות</span>
+      <span class="step-summary" id="settingsSummary"></span>
+      <span class="chev">⌄</span>
+    </button>
+    <div class="step-body-wrap expanded" id="settingsBodyWrap">
+      <div class="step-body-inner">
+
+        <div class="settings-field">
+          <span class="label">מפתח API של OpenAI</span>
+          <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+          <p class="hint">המפתח נשמר רק בזיכרון הדף הזה, לא מועבר לשום מקום חוץ מ-OpenAI, ונעלם ברגע שתסגור את הדף. אפשר ליצור מפתח בכתובת <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></p>
+        </div>
+
+        <div class="settings-field">
+          <span class="label">כתובת שרת מתווך (Worker)</span>
+          <input type="text" id="proxyUrl" placeholder="https://your-worker.your-name.workers.dev" autocomplete="off">
+          <p class="hint">OpenAI חוסמת קריאות ישירות מהדפדפן, אז צריך שרת קטנטן שרק מעביר את הבקשה הלאה. הכתובת שתקבל אחרי הקמת ה-Worker נכנסת כאן.</p>
+        </div>
+
+        <div class="settings-field">
+          <span class="label">הקשר לתמלול (אופציונלי)</span>
+          <input type="text" id="promptText" placeholder="לדוגמה: שיעור בחסידות, אהבת תמים, שמות של אנשים..." autocomplete="off">
+          <p class="hint">מונחים, שמות או ז'רגון שחוזרים בסרטון — עוזר ל-Whisper לזהות אותם נכון במקום לנחש מילה דומה. לא חובה.</p>
+        </div>
+
+      </div>
+    </div>
   </section>
 
-  <section>
-    <span class="label">כתובת שרת מתווך (Worker)</span>
-    <input type="text" id="proxyUrl" placeholder="https://your-worker.your-name.workers.dev" autocomplete="off">
-    <p class="hint">OpenAI חוסמת קריאות ישירות מהדפדפן, אז צריך שרת קטנטן שרק מעביר את הבקשה הלאה. הכתובת שתקבל אחרי הקמת ה-Worker נכנסת כאן.</p>
-  </section>
-
-  <section>
-    <span class="label">הקשר לתמלול (אופציונלי)</span>
-    <input type="text" id="promptText" placeholder="לדוגמה: שיעור בחסידות, אהבת תמים, שמות של אנשים..." autocomplete="off">
-    <p class="hint">מונחים, שמות או ז'רגון שחוזרים בסרטון — עוזר ל-Whisper לזהות אותם נכון במקום לנחש מילה דומה. לא חובה.</p>
-  </section>
-
-  <section>
-    <span class="label">סרטון</span>
+  <section class="step" id="videoStep">
+    <div class="step-static-head">
+      <span class="step-badge">02</span>
+      <span class="step-title">סרטון</span>
+    </div>
     <div class="dropzone" id="dropzone">
       <div class="icon">🎬</div>
       <div class="main">לחצו כאן לבחירת סרטון, או גררו לתוך האזור</div>
@@ -330,22 +400,28 @@
     </div>
     <input type="file" id="fileInput" accept="video/*,audio/*">
     <p class="hint">גודל קובץ מקסימלי: 25MB (מגבלה של OpenAI). סרטונים כבדים יותר — כדאי לדחוס קודם.</p>
-  </section>
 
-  <section id="compressSection" style="display:none">
-    <span class="label">דחיסת הסרטון</span>
-    <div class="compress-row">
-      <div class="compress-info">משקל נוכחי: <b id="origSize"></b></div>
+    <div id="compressSection" style="display:none">
+      <div class="step-sub">
+        <div class="compress-head">
+          <div class="compress-info">משקל נוכחי: <b id="origSize"></b></div>
+          <button class="mini-toggle" id="compressToggle" type="button" aria-expanded="true">דחיסה <span class="chev">⌄</span></button>
+        </div>
+        <div class="step-body-wrap expanded" id="compressBodyWrap">
+          <div class="step-body-inner">
+            <div class="quality-picker" id="qualityPicker">
+              <button data-preset="high" class="active">איכות גבוהה</button>
+              <button data-preset="balanced">מאוזן</button>
+              <button data-preset="small">קובץ קטן</button>
+            </div>
+            <button class="btn-primary" id="compressBtn">דחיסת הסרטון</button>
+            <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="compress-done" id="compressDone"></div>
+            <p class="hint">הדחיסה רצה כולה בדפדפן (בלי להעלות כלום לשום שרת), ומקטינה רזולוציה וקצב סיביות כדי לרדת מתחת ל-25MB. בסרטונים ארוכים זה יכול לקחת כמה דקות, ובמובייל לפעמים איטי יותר.</p>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="quality-picker" id="qualityPicker">
-      <button data-preset="high" class="active">איכות גבוהה</button>
-      <button data-preset="balanced">מאוזן</button>
-      <button data-preset="small">קובץ קטן</button>
-    </div>
-    <button class="btn-primary" id="compressBtn">דחיסת הסרטון</button>
-    <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="compress-done" id="compressDone"></div>
-    <p class="hint">הדחיסה רצה כולה בדפדפן (בלי להעלות כלום לשום שרת), ומקטינה רזולוציה וקצב סיביות כדי לרדת מתחת ל-25MB. בסרטונים ארוכים זה יכול לקחת כמה דקות, ובמובייל לפעמים איטי יותר.</p>
   </section>
 
   <div class="video-stage" id="videoStage" style="display:none">
@@ -353,15 +429,22 @@
     <div class="caption-overlay"><span id="captionText"></span></div>
   </div>
 
-  <section id="actionSection" style="display:none">
+  <section class="step" id="actionSection" style="display:none">
+    <div class="step-static-head">
+      <span class="step-badge">03</span>
+      <span class="step-title">יצירת כתוביות</span>
+    </div>
     <button class="btn-primary" id="generateBtn">יצירת כתוביות</button>
     <div class="status" id="status"><div class="spinner"></div><span id="statusText"></span></div>
     <div class="timecode-strip" id="segList"></div>
     <button class="btn-secondary" id="downloadBtn" style="display:none">הורדת קובץ SRT</button>
   </section>
 
-  <section id="styleSection" style="display:none">
-    <span class="label">סגנון כתוביות</span>
+  <section class="step" id="styleSection" style="display:none">
+    <div class="step-static-head">
+      <span class="step-badge">04</span>
+      <span class="step-title">סגנון וייצוא</span>
+    </div>
 
     <div class="style-row">
       <span class="label" style="margin:0">גודל טקסט</span>
@@ -439,6 +522,42 @@
   const exportBtn = document.getElementById('exportBtn');
   const exportProgressTrack = document.getElementById('exportProgressTrack');
   const exportProgressFill = document.getElementById('exportProgressFill');
+  const settingsHead = document.getElementById('settingsHead');
+  const settingsBodyWrap = document.getElementById('settingsBodyWrap');
+  const settingsSummary = document.getElementById('settingsSummary');
+  const proxyUrlInput = document.getElementById('proxyUrl');
+  const promptTextInput = document.getElementById('promptText');
+  const compressToggle = document.getElementById('compressToggle');
+  const compressBodyWrap = document.getElementById('compressBodyWrap');
+
+  function setSettingsExpanded(expanded){
+    settingsHead.setAttribute('aria-expanded', String(expanded));
+    settingsBodyWrap.classList.toggle('expanded', expanded);
+    if(!expanded) updateSettingsSummary();
+  }
+  function updateSettingsSummary(){
+    const key = apiKeyInput.value.trim();
+    const proxy = proxyUrlInput.value.trim();
+    const keyPart = key ? ('מפתח sk-***' + key.slice(-4)) : 'אין מפתח';
+    const proxyPart = proxy ? 'Worker מוגדר' : 'אין Worker';
+    settingsSummary.textContent = `${keyPart} · ${proxyPart}`;
+  }
+  settingsHead.addEventListener('click', () => {
+    setSettingsExpanded(settingsHead.getAttribute('aria-expanded') !== 'true');
+  });
+  [apiKeyInput, proxyUrlInput, promptTextInput].forEach(el => {
+    el.addEventListener('input', updateSettingsSummary);
+  });
+  updateSettingsSummary();
+  let settingsAutoCollapsedOnce = false;
+
+  function setCompressExpanded(expanded){
+    compressToggle.setAttribute('aria-expanded', String(expanded));
+    compressBodyWrap.classList.toggle('expanded', expanded);
+  }
+  compressToggle.addEventListener('click', () => {
+    setCompressExpanded(compressToggle.getAttribute('aria-expanded') !== 'true');
+  });
 
   let captionStyle = { fontSize: 22, color: '#ffffff', bgColor: '#000000', bgOpacity: 0.78, position: 'bottom' };
 
@@ -492,6 +611,12 @@
     if(file.size > 25 * 1024 * 1024){
       showStatus('הקובץ מעל 25MB — צריך לדחוס אותו למטה לפני יצירת כתוביות.', 'err');
     }
+
+    if(!settingsAutoCollapsedOnce){
+      setSettingsExpanded(false);
+      settingsAutoCollapsedOnce = true;
+    }
+    setCompressExpanded(true);
   }
 
   function showStatus(msg, kind){
@@ -653,6 +778,7 @@
         showStatus('עדיין מעל 25MB — נסה הגדרת "קובץ קטן".', 'err');
       } else {
         showStatus('מוכן ליצירת כתוביות.', 'ok');
+        setCompressExpanded(false);
       }
     }catch(err){
       showStatus('הדחיסה נכשלה: ' + (err.message || 'שגיאה לא צפויה.'), 'err');
@@ -707,14 +833,15 @@
   generateBtn.addEventListener('click', async () => {
     const key = apiKeyInput.value.trim();
     const proxyUrl = document.getElementById('proxyUrl').value.trim();
-    if(!key){ showStatus('צריך להזין מפתח API קודם.', 'err'); return; }
-    if(!proxyUrl){ showStatus('צריך להזין כתובת שרת מתווך (Worker) קודם.', 'err'); return; }
+    if(!key){ setSettingsExpanded(true); showStatus('צריך להזין מפתח API קודם.', 'err'); return; }
+    if(!proxyUrl){ setSettingsExpanded(true); showStatus('צריך להזין כתובת שרת מתווך (Worker) קודם.', 'err'); return; }
     if(!currentFile){ showStatus('צריך לבחור סרטון קודם.', 'err'); return; }
     if(currentFile.size > 25 * 1024 * 1024){
       showStatus('הקובץ עדיין מעל 25MB — דחוס אותו קודם למעלה.', 'err');
       return;
     }
 
+    setCompressExpanded(false);
     generateBtn.disabled = true;
     showStatus('שולח את הסרטון ל-Whisper ומתמלל בעברית — זה יכול לקחת דקה או שתיים...');
 
