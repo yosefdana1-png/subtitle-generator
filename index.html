@@ -332,6 +332,27 @@
   }
   .compress-done.show{ display:block; }
 
+  .preset-picker{
+    display:flex; gap:10px; overflow-x:auto; padding: 2px 2px 14px;
+    margin-top: -2px;
+  }
+  .preset-chip{
+    flex-shrink:0; width:auto; display:flex; flex-direction:column;
+    align-items:center; gap:6px; padding: 10px 14px;
+    background: var(--panel-2); border: 1.5px solid var(--edge);
+    border-radius: 14px; cursor:pointer;
+  }
+  .preset-chip:hover{ border-color: var(--amber-dim); }
+  .preset-chip.active{ border-color: var(--amber); background: rgba(255,138,101,0.08); }
+  .preset-chip .swatch{
+    font-size: 15px; line-height:1; padding: 4px 10px; border-radius: 6px;
+    white-space:nowrap;
+  }
+  .preset-chip .plabel{
+    font-size: 10.5px; color: var(--text-dim); white-space:nowrap;
+  }
+  .preset-chip.active .plabel{ color: var(--amber); }
+
   .style-row{
     display:flex; align-items:center; justify-content:space-between;
     gap: 12px; margin-bottom: 14px;
@@ -504,6 +525,9 @@
       <span class="step-title">סגנון וייצוא</span>
     </div>
 
+    <span class="label">סגנון מוכן</span>
+    <div class="preset-picker" id="presetPicker"></div>
+
     <div class="style-row">
       <span class="label" style="margin:0">גודל טקסט</span>
       <input type="range" id="styleFontSize" min="14" max="40" value="22">
@@ -517,7 +541,7 @@
       <input type="color" id="styleBgColor" value="#000000">
     </div>
 
-    <div class="style-row">
+    <div class="style-row" id="bgOpacityRow">
       <span class="label" style="margin:0">שקיפות רקע</span>
       <input type="range" id="styleBgOpacity" min="0" max="100" value="78">
       <span class="style-value" id="styleBgOpacityVal">78%</span>
@@ -657,7 +681,69 @@
     setCompressExpanded(compressToggle.getAttribute('aria-expanded') !== 'true');
   });
 
-  let captionStyle = { fontSize: 22, color: '#ffffff', bgColor: '#000000', bgOpacity: 0.78, position: 'bottom' };
+  let captionStyle = {
+    fontSize: 22, color: '#ffffff', bgColor: '#000000', bgOpacity: 0.78,
+    position: 'bottom', weight: 500, boxed: true, strokeColor: null
+  };
+
+  const CAPTION_PRESETS = [
+    { id:'classic', label:'קלאסי',    color:'#ffffff', bgColor:'#000000', bgOpacity:0.78, boxed:true,  strokeColor:null,      weight:500 },
+    { id:'tiktok',  label:'טיקטוק',   color:'#ffffff', bgColor:'#000000', bgOpacity:0,    boxed:false, strokeColor:'#000000', weight:800 },
+    { id:'neon',    label:'ניאון',    color:'#f9ff3d', bgColor:'#000000', bgOpacity:0,    boxed:false, strokeColor:'#000000', weight:800 },
+    { id:'glow',    label:'זוהר ורוד', color:'#ffffff', bgColor:'#ff3d8a', bgOpacity:0,    boxed:false, strokeColor:'#ff3d8a', weight:800 },
+    { id:'mint',    label:'מינטי',    color:'#0f2c22', bgColor:'#5fe0b0', bgOpacity:0.92, boxed:true,  strokeColor:null,      weight:700 },
+  ];
+
+  const presetPicker = document.getElementById('presetPicker');
+  const bgOpacityRow = document.getElementById('bgOpacityRow');
+  let activePresetId = 'classic';
+
+  function renderPresetPicker(){
+    presetPicker.innerHTML = '';
+    CAPTION_PRESETS.forEach(p => {
+      const chip = document.createElement('div');
+      chip.className = 'preset-chip' + (p.id === activePresetId ? ' active' : '');
+      chip.dataset.preset = p.id;
+      const swatch = document.createElement('span');
+      swatch.className = 'swatch';
+      swatch.textContent = 'Aa';
+      swatch.style.color = p.color;
+      swatch.style.fontWeight = p.weight;
+      swatch.style.background = p.boxed ? hexToRgba(p.bgColor, p.bgOpacity) : 'transparent';
+      if(p.strokeColor){
+        swatch.style.webkitTextStroke = '1px ' + p.strokeColor;
+        swatch.style.textShadow = `0 0 5px ${p.strokeColor}`;
+      }
+      const label = document.createElement('span');
+      label.className = 'plabel';
+      label.textContent = p.label;
+      chip.appendChild(swatch);
+      chip.appendChild(label);
+      chip.addEventListener('click', () => applyPreset(p.id));
+      presetPicker.appendChild(chip);
+    });
+  }
+
+  function applyPreset(id){
+    const p = CAPTION_PRESETS.find(x => x.id === id);
+    if(!p) return;
+    activePresetId = id;
+    captionStyle.color = p.color;
+    captionStyle.bgColor = p.bgColor;
+    captionStyle.bgOpacity = p.bgOpacity;
+    captionStyle.boxed = p.boxed;
+    captionStyle.strokeColor = p.strokeColor;
+    captionStyle.weight = p.weight;
+    styleColor.value = p.color;
+    styleBgColor.value = p.bgColor;
+    styleBgOpacity.value = Math.round(p.bgOpacity * 100);
+    styleBgOpacityVal.textContent = Math.round(p.bgOpacity * 100) + '%';
+    bgOpacityRow.style.display = p.boxed ? 'flex' : 'none';
+    renderPresetPicker();
+    applyStyleToOverlay();
+  }
+
+  renderPresetPicker();
 
   let currentFile = null;
   let segments = [];
@@ -780,8 +866,24 @@
   function applyStyleToOverlay(){
     const overlay = document.querySelector('.caption-overlay');
     captionText.style.fontSize = captionStyle.fontSize + 'px';
+    captionText.style.fontWeight = captionStyle.weight;
     captionText.style.color = captionStyle.color;
-    captionText.style.background = hexToRgba(captionStyle.bgColor, captionStyle.bgOpacity);
+    if(captionStyle.boxed){
+      captionText.style.background = hexToRgba(captionStyle.bgColor, captionStyle.bgOpacity);
+      captionText.style.padding = '6px 14px';
+      captionText.style.borderRadius = '5px';
+    } else {
+      captionText.style.background = 'transparent';
+      captionText.style.padding = '0';
+      captionText.style.borderRadius = '0';
+    }
+    if(captionStyle.strokeColor){
+      captionText.style.webkitTextStroke = '1.5px ' + captionStyle.strokeColor;
+      captionText.style.textShadow = `0 0 6px ${captionStyle.strokeColor}, 0 2px 4px rgba(0,0,0,0.5)`;
+    } else {
+      captionText.style.webkitTextStroke = '';
+      captionText.style.textShadow = captionStyle.boxed ? '' : '0 2px 6px rgba(0,0,0,0.6)';
+    }
     overlay.style.bottom = captionStyle.position === 'top' ? 'auto' : '6%';
     overlay.style.top = captionStyle.position === 'top' ? '6%' : 'auto';
   }
@@ -804,11 +906,16 @@
     styleFontSizeVal.textContent = captionStyle.fontSize + 'px';
     applyStyleToOverlay();
   });
-  styleColor.addEventListener('input', () => { captionStyle.color = styleColor.value; applyStyleToOverlay(); });
-  styleBgColor.addEventListener('input', () => { captionStyle.bgColor = styleBgColor.value; applyStyleToOverlay(); });
+  function deselectPreset(){
+    activePresetId = null;
+    renderPresetPicker();
+  }
+  styleColor.addEventListener('input', () => { captionStyle.color = styleColor.value; deselectPreset(); applyStyleToOverlay(); });
+  styleBgColor.addEventListener('input', () => { captionStyle.bgColor = styleBgColor.value; deselectPreset(); applyStyleToOverlay(); });
   styleBgOpacity.addEventListener('input', () => {
     captionStyle.bgOpacity = parseInt(styleBgOpacity.value, 10) / 100;
     styleBgOpacityVal.textContent = styleBgOpacity.value + '%';
+    deselectPreset();
     applyStyleToOverlay();
   });
   posPicker.addEventListener('click', e => {
@@ -843,10 +950,14 @@
         captionStyle.bgColor = '#000000';
         captionStyle.bgOpacity = 0.75;
       }
+      captionStyle.boxed = true;
+      captionStyle.strokeColor = null;
       styleColor.value = captionStyle.color;
       styleBgColor.value = captionStyle.bgColor;
       styleBgOpacity.value = Math.round(captionStyle.bgOpacity*100);
       styleBgOpacityVal.textContent = Math.round(captionStyle.bgOpacity*100) + '%';
+      bgOpacityRow.style.display = 'flex';
+      deselectPreset();
       applyStyleToOverlay();
       showStatus(`זוהה סגנון אוטומטית (בהירות ממוצעת: ${Math.round(avgBrightness)}/255).`, 'ok');
     }catch(e){
@@ -1126,10 +1237,19 @@
       const refH = video.clientHeight || Math.round(refW * 9 / 16);
 
       const primary = toAssColor(captionStyle.color, 1);
-      const back = toAssColor(captionStyle.bgColor, captionStyle.bgOpacity);
       const alignment = captionStyle.position === 'top' ? 8 : 2;
       const marginV = Math.round(refH * 0.06);
-      const forceStyle = `FontName=Noto Sans Hebrew,FontSize=${captionStyle.fontSize},PrimaryColour=${primary},BackColour=${back},BorderStyle=3,Outline=6,Shadow=0,MarginV=${marginV},Alignment=${alignment}`;
+      const bold = captionStyle.weight >= 700 ? 1 : 0;
+      // BorderStyle 3 = opaque box behind the text (using BackColour); BorderStyle 1 =
+      // outline + drop shadow with a transparent background — the punchy no-box look.
+      let forceStyle;
+      if(captionStyle.boxed){
+        const back = toAssColor(captionStyle.bgColor, captionStyle.bgOpacity);
+        forceStyle = `FontName=Noto Sans Hebrew,Bold=${bold},FontSize=${captionStyle.fontSize},PrimaryColour=${primary},BackColour=${back},BorderStyle=3,Outline=6,Shadow=0,MarginV=${marginV},Alignment=${alignment}`;
+      } else {
+        const outlineColor = toAssColor(captionStyle.strokeColor || '#000000', 1);
+        forceStyle = `FontName=Noto Sans Hebrew,Bold=${bold},FontSize=${captionStyle.fontSize},PrimaryColour=${primary},OutlineColour=${outlineColor},BorderStyle=1,Outline=2.5,Shadow=1,MarginV=${marginV},Alignment=${alignment}`;
+      }
 
       showStatus('שורף את הכתוביות לתוך הווידאו...');
       await ff.run(
