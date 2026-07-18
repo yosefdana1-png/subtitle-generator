@@ -518,7 +518,14 @@
 
     try{
       const formData = new FormData();
-      formData.append('file', currentFile);
+      const SUPPORTED_EXT = ['flac','m4a','mp3','mp4','mpeg','mpga','oga','ogg','wav','webm'];
+      const currentExt = (currentFile.name.split('.').pop() || '').toLowerCase();
+      let uploadFile = currentFile;
+      if(!SUPPORTED_EXT.includes(currentExt)){
+        const safeName = currentFile.name.replace(/\.[^.]+$/, '') + '.mp4';
+        uploadFile = new File([currentFile], safeName, { type: 'video/mp4' });
+      }
+      formData.append('file', uploadFile);
       formData.append('model', 'whisper-1');
       formData.append('language', 'he');
       formData.append('response_format', 'verbose_json');
