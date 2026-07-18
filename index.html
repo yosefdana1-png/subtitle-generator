@@ -5,81 +5,160 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>כתובית — יצירת כתוביות אוטומטית</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Rubik:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
   :root{
-    --bg: #121309;
-    --panel: #1b1c14;
-    --panel-2: #23241a;
-    --edge: #35362a;
-    --amber: #c98a3e;
-    --amber-dim: #8a5f2c;
-    --text: #eee8db;
-    --text-dim: #948e78;
-    --green: #7a9b6e;
-    --red: #b25b4f;
+    --bg: #17151f;
+    --panel: #211f2c;
+    --panel-2: #2b2839;
+    --edge: rgba(255,255,255,0.09);
+    --edge-soft: rgba(255,255,255,0.05);
+    --amber: #ff8a65;
+    --amber-dim: #d16c8f;
+    --amber-glow: rgba(255,138,101,0.3);
+    --accent-grad: linear-gradient(135deg, #ff9966, #ff5f9e);
+    --text: #f6f2ef;
+    --text-dim: #a79fc0;
+    --green: #5fd4a0;
+    --red: #ff6b6b;
+    --radius: 18px;
+    --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
   }
   *{ box-sizing: border-box; }
   html,body{ margin:0; padding:0; }
   body{
     background: var(--bg);
     background-image:
-      radial-gradient(circle at 15% 10%, rgba(201,138,62,0.06), transparent 40%),
-      radial-gradient(circle at 85% 90%, rgba(201,138,62,0.04), transparent 40%);
+      radial-gradient(circle at 12% 8%, rgba(255,153,102,0.14), transparent 45%),
+      radial-gradient(circle at 90% 15%, rgba(255,95,158,0.1), transparent 45%),
+      radial-gradient(circle at 80% 95%, rgba(255,153,102,0.08), transparent 45%);
     color: var(--text);
     font-family: 'Rubik', sans-serif;
     min-height: 100vh;
-    padding: 28px 16px 80px;
+    padding: 32px 16px 80px;
   }
   .wrap{ max-width: 760px; margin: 0 auto; }
 
-  /* Header — film slate motif */
-  header{ margin-bottom: 28px; }
+  header{ margin-bottom: 26px; }
   .eyebrow{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.12em;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
     color: var(--amber);
     display:flex; align-items:center; gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
   .eyebrow::before{
-    content:""; width: 7px; height:7px; border-radius:50%;
-    background: var(--amber); display:inline-block;
-    box-shadow: 0 0 8px var(--amber);
+    content:""; width: 8px; height:8px; border-radius:50%;
+    background: var(--accent-grad); display:inline-block;
+    box-shadow: 0 0 10px var(--amber-glow);
+    animation: recPulse 2s ease-in-out infinite;
+  }
+  @keyframes recPulse{
+    0%, 100%{ transform: scale(1); opacity:1; }
+    50%{ transform: scale(1.25); opacity:.7; }
   }
   h1{
-    font-family: 'Frank Ruhl Libre', serif;
+    font-family: 'Rubik', sans-serif;
     font-weight: 900;
-    font-size: clamp(32px, 7vw, 44px);
-    margin: 0 0 8px;
-    letter-spacing: -0.01em;
+    font-size: clamp(32px, 7vw, 48px);
+    margin: 0 0 10px;
+    letter-spacing: -0.02em;
   }
-  h1 span{ color: var(--amber); }
+  h1 span{
+    background: var(--accent-grad);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
   .sub{
     color: var(--text-dim);
     font-size: 14.5px;
-    line-height: 1.6;
+    line-height: 1.65;
     max-width: 46ch;
   }
 
-  /* Sprocket divider — the signature element */
+  /* Flowing divider — the signature element */
   .sprockets{
-    display:flex; gap:6px; margin: 22px 0;
-    overflow:hidden;
+    height: 3px; margin: 24px 0; border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--edge) 15%, var(--edge) 85%, transparent);
+    position: relative; overflow: hidden;
   }
-  .sprockets span{
-    width:8px; height:8px; border:1.5px solid var(--edge);
-    border-radius:2px; flex-shrink:0;
+  .sprockets::after{
+    content:""; position:absolute; inset:0; width: 40%;
+    background: var(--accent-grad); border-radius: 999px; opacity:.55;
+    animation: flowLine 3.5s ease-in-out infinite;
+  }
+  @keyframes flowLine{
+    0%{ transform: translateX(-100%); }
+    100%{ transform: translateX(250%); }
   }
 
   section{
-    background: var(--panel);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 40%), var(--panel);
     border: 1px solid var(--edge);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 16px;
+    border-top-color: var(--edge-soft);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 0 var(--edge-soft) inset, 0 8px 24px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.18);
+    transition: box-shadow .2s, transform .2s;
   }
+  .step{ position:relative; overflow:hidden; }
+  .step::before{
+    content:""; position:absolute; top:0; bottom:0; right:0; width:4px;
+    background: var(--accent-grad);
+    opacity: .7;
+  }
+  .step-head{
+    display:flex; align-items:center; gap:10px; width:100%;
+    background:none; border:none; padding:0; margin:0;
+    color: var(--text); cursor:pointer; text-align:right;
+    font-family: 'Rubik', sans-serif;
+  }
+  .step-static-head{
+    display:flex; align-items:center; gap:10px; margin-bottom:18px;
+  }
+  .step-badge{
+    font-family: 'Rubik', sans-serif; font-weight: 700;
+    font-size: 12px; color: #2a1220; flex-shrink:0;
+    border-radius: 999px;
+    background: var(--accent-grad);
+    box-shadow: 0 3px 10px rgba(255,95,158,0.28);
+    width: 28px; height: 28px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step-title{ font-size: 15px; font-weight: 700; flex-shrink:0; }
+  .step-summary{
+    font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+    color: var(--text-dim); flex:1; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    direction:ltr; text-align:right;
+  }
+  .step-check{ color: var(--green); font-size: 14px; flex-shrink:0; }
+  .chev{ color: var(--text-dim); font-size: 11px; flex-shrink:0; transition: transform .2s; }
+  [aria-expanded="true"] > .chev, [aria-expanded="true"] .chev{ transform: rotate(180deg); }
+  .step-body-wrap{
+    display:grid; grid-template-rows: 0fr;
+    transition: grid-template-rows .22s ease;
+  }
+  .step-body-wrap.expanded{ grid-template-rows: 1fr; }
+  .step-body-inner{ overflow:hidden; }
+  .step-body-wrap.expanded .step-body-inner{ padding-top: 18px; }
+  .settings-field{ margin-bottom: 18px; }
+  .settings-field:last-child{ margin-bottom: 0; }
+  .compress-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .mini-toggle{
+    display:flex; align-items:center; gap:6px;
+    background: var(--panel-2); border: 1px solid var(--edge);
+    color: var(--text-dim); font-family:'Rubik', sans-serif; font-weight:500;
+    font-size: 12px; padding: 7px 14px; border-radius: 999px;
+    cursor:pointer; width:auto; flex-shrink:0;
+    transition: border-color .15s, color .15s;
+  }
+  .mini-toggle:hover{ border-color: var(--amber-dim); color: var(--text); }
   .label{
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
@@ -94,31 +173,48 @@
     background: var(--panel-2);
     border: 1px solid var(--edge);
     color: var(--text);
-    padding: 12px 14px;
-    border-radius: 7px;
+    padding: 13px 16px;
+    border-radius: 14px;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 13px;
     direction: ltr;
     text-align: left;
+    transition: border-color .15s, box-shadow .15s;
   }
   input[type=password]:focus, input[type=text]:focus{
     outline: none; border-color: var(--amber-dim);
+    box-shadow: 0 0 0 4px var(--amber-glow);
   }
   .hint{ font-size: 12px; color: var(--text-dim); margin-top: 8px; line-height:1.6; }
   .hint a{ color: var(--amber); }
 
+  .link-btn{
+    background:none; border:none; width:auto; padding:0;
+    color: var(--text-dim); font-size: 11.5px;
+    font-family: 'Rubik', sans-serif; text-decoration: underline;
+    text-underline-offset: 3px; cursor:pointer;
+  }
+  .link-btn:hover{ color: var(--amber); }
+
   .dropzone{
-    border: 1.5px dashed var(--edge);
-    border-radius: 8px;
-    padding: 30px 16px;
+    border: 2px dashed var(--edge);
+    border-radius: 16px;
+    padding: 34px 16px;
     text-align: center;
     cursor: pointer;
-    transition: border-color .15s, background .15s;
+    transition: border-color .2s var(--ease-bounce), background .2s, transform .15s var(--ease-bounce);
   }
-  .dropzone:hover, .dropzone.drag{
+  .dropzone:hover{
     border-color: var(--amber-dim);
-    background: rgba(201,138,62,0.04);
+    background: rgba(255,138,101,0.06);
+    transform: scale(1.005);
   }
+  .dropzone.drag{
+    border-color: var(--amber);
+    background: rgba(255,138,101,0.09);
+    transform: scale(1.01);
+  }
+  .dropzone:active{ transform: scale(.995); }
   .dropzone .icon{ font-size: 26px; margin-bottom: 8px; }
   .dropzone .main{ font-size: 14px; }
   .dropzone .fname{
@@ -131,7 +227,7 @@
   input[type=file]{ display:none; }
 
   video{
-    width: 100%; display:block; border-radius: 7px;
+    width: 100%; display:block; border-radius: 14px;
     background:#000;
   }
   .video-stage{ position: relative; margin-bottom: 12px; }
@@ -153,23 +249,34 @@
 
   button{
     font-family: 'Rubik', sans-serif;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14.5px;
     border: none;
-    border-radius: 7px;
-    padding: 13px 20px;
+    border-radius: 999px;
+    padding: 14px 22px;
     cursor: pointer;
     width: 100%;
-    transition: filter .15s, opacity .15s;
+    transition: filter .15s, opacity .15s, transform .15s var(--ease-bounce), box-shadow .2s;
   }
   button:disabled{ opacity: .45; cursor: not-allowed; }
-  .btn-primary{ background: var(--amber); color: #1a1200; font-weight:600; }
-  .btn-primary:hover:not(:disabled){ filter: brightness(1.08); }
+  .btn-primary{
+    background: var(--accent-grad);
+    background-size: 160% 160%;
+    color: #2a1220; font-weight:700;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 8px 20px rgba(255,95,158,0.28);
+  }
+  .btn-primary:hover:not(:disabled){
+    background-position: 100% 0;
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 10px 26px rgba(255,95,158,0.4);
+  }
+  .btn-primary:active:not(:disabled){ transform: translateY(1px) scale(.99); }
   .btn-secondary{
-    background: transparent; color: var(--text);
+    background: var(--panel-2); color: var(--text);
     border: 1px solid var(--edge); margin-top: 8px;
   }
-  .btn-secondary:hover:not(:disabled){ border-color: var(--amber-dim); }
+  .btn-secondary:hover:not(:disabled){ border-color: var(--amber-dim); color: var(--amber); transform: translateY(-1px); }
+  .btn-secondary:active:not(:disabled){ transform: translateY(1px); }
 
   .status{
     font-family: 'IBM Plex Mono', monospace;
@@ -201,20 +308,21 @@
   .quality-picker button{
     flex:1; width:auto; padding: 9px 6px;
     background: var(--panel-2); border: 1px solid var(--edge);
-    color: var(--text-dim); font-size: 12.5px;
+    color: var(--text-dim); font-size: 12.5px; font-weight:500;
   }
   .quality-picker button.active{
-    border-color: var(--amber); color: var(--amber);
-    background: rgba(201,138,62,0.08);
+    border-color: transparent; color: #2a1220;
+    background: var(--accent-grad);
   }
   .progress-track{
-    width:100%; height:6px; border-radius:4px;
+    width:100%; height:7px; border-radius:999px;
     background: var(--panel-2); overflow:hidden; margin-top: 10px;
     display:none;
   }
   .progress-track.show{ display:block; }
   .progress-fill{
-    height:100%; width:0%; background: var(--amber);
+    height:100%; width:0%; background: var(--accent-grad);
+    border-radius:999px;
     transition: width .2s;
   }
   .compress-done{
@@ -234,18 +342,18 @@
     flex:1; accent-color: var(--amber); height: 4px;
   }
   input[type=color]{
-    width: 40px; height: 32px; border-radius: 6px; border: 1px solid var(--edge);
+    width: 40px; height: 32px; border-radius: 10px; border: 1px solid var(--edge);
     background: var(--panel-2); padding: 2px; flex-shrink:0;
   }
   .pos-picker{ display:flex; gap:8px; flex:1; }
   .pos-picker button{
     flex:1; width:auto; padding: 8px 6px;
     background: var(--panel-2); border: 1px solid var(--edge);
-    color: var(--text-dim); font-size: 12.5px;
+    color: var(--text-dim); font-size: 12.5px; font-weight:500;
   }
   .pos-picker button.active{
-    border-color: var(--amber); color: var(--amber);
-    background: rgba(201,138,62,0.08);
+    border-color: transparent; color: #2a1220;
+    background: var(--accent-grad);
   }
   .style-value{
     font-family: 'IBM Plex Mono', monospace;
@@ -274,7 +382,8 @@
     font-size: 13.5px;
     cursor: pointer;
   }
-  .seg:hover{ background: rgba(201,138,62,0.05); }
+  .seg{ border-radius: 10px; }
+  .seg:hover{ background: rgba(255,138,101,0.08); }
   .seg .tc{
     font-family: 'IBM Plex Mono', monospace;
     color: var(--amber-dim);
@@ -286,9 +395,9 @@
   .seg .txt{ flex:1; }
 
   footer{
-    text-align:center; color: var(--edge);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; margin-top: 40px;
+    text-align:center; color: var(--text-dim);
+    font-family: 'Rubik', sans-serif;
+    font-size: 12px; margin-top: 40px; opacity: .6;
   }
 </style>
 </head>
@@ -296,33 +405,52 @@
 <div class="wrap">
 
   <header>
-    <div class="eyebrow">REC · WHISPER-1 · עברית</div>
+    <div class="eyebrow">כתוביות בעברית תוך דקות</div>
     <h1>כתו<span>בית</span></h1>
     <p class="sub">מעלים סרטון, מקבלים כתוביות בעברית מסונכרנות אוטומטית, ומורידים קובץ SRT. התמלול רץ ישירות מהדפדפן שלך אל OpenAI — שום קובץ לא נשמר בשום מקום אחר.</p>
   </header>
 
-  <div class="sprockets" id="sprockets"></div>
+  <div class="sprockets"></div>
 
-  <section>
-    <span class="label">מפתח API של OpenAI</span>
-    <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
-    <p class="hint">המפתח נשמר רק בזיכרון הדף הזה, לא מועבר לשום מקום חוץ מ-OpenAI, ונעלם ברגע שתסגור את הדף. אפשר ליצור מפתח בכתובת <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></p>
+  <section class="step" id="settingsStep">
+    <button class="step-head" id="settingsHead" type="button" aria-expanded="true">
+      <span class="step-badge">01</span>
+      <span class="step-title">הגדרות</span>
+      <span class="step-summary" id="settingsSummary"></span>
+      <span class="chev">⌄</span>
+    </button>
+    <div class="step-body-wrap expanded" id="settingsBodyWrap">
+      <div class="step-body-inner">
+
+        <div class="settings-field">
+          <span class="label">מפתח API של OpenAI</span>
+          <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+          <p class="hint">המפתח נשמר בדפדפן הזה בלבד (על המכשיר שלכם), ולא מועבר לשום מקום חוץ מ-OpenAI. אפשר ליצור מפתח בכתובת <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></p>
+        </div>
+
+        <div class="settings-field">
+          <span class="label">כתובת שרת מתווך (Worker)</span>
+          <input type="text" id="proxyUrl" placeholder="https://your-worker.your-name.workers.dev" autocomplete="off">
+          <p class="hint">OpenAI חוסמת קריאות ישירות מהדפדפן, אז צריך שרת קטנטן שרק מעביר את הבקשה הלאה. הכתובת שתקבל אחרי הקמת ה-Worker נכנסת כאן.</p>
+        </div>
+
+        <div class="settings-field">
+          <span class="label">הקשר לתמלול (אופציונלי)</span>
+          <input type="text" id="promptText" placeholder="לדוגמה: שיעור בחסידות, אהבת תמים, שמות של אנשים..." autocomplete="off">
+          <p class="hint">מונחים, שמות או ז'רגון שחוזרים בסרטון — עוזר ל-Whisper לזהות אותם נכון במקום לנחש מילה דומה. לא חובה.</p>
+        </div>
+
+        <button class="link-btn" id="forgetSettingsBtn" type="button">שכחו אותי — מחיקת הפרטים השמורים בדפדפן</button>
+
+      </div>
+    </div>
   </section>
 
-  <section>
-    <span class="label">כתובת שרת מתווך (Worker)</span>
-    <input type="text" id="proxyUrl" placeholder="https://your-worker.your-name.workers.dev" autocomplete="off">
-    <p class="hint">OpenAI חוסמת קריאות ישירות מהדפדפן, אז צריך שרת קטנטן שרק מעביר את הבקשה הלאה. הכתובת שתקבל אחרי הקמת ה-Worker נכנסת כאן.</p>
-  </section>
-
-  <section>
-    <span class="label">הקשר לתמלול (אופציונלי)</span>
-    <input type="text" id="promptText" placeholder="לדוגמה: שיעור בחסידות, אהבת תמים, שמות של אנשים..." autocomplete="off">
-    <p class="hint">מונחים, שמות או ז'רגון שחוזרים בסרטון — עוזר ל-Whisper לזהות אותם נכון במקום לנחש מילה דומה. לא חובה.</p>
-  </section>
-
-  <section>
-    <span class="label">סרטון</span>
+  <section class="step" id="videoStep">
+    <div class="step-static-head">
+      <span class="step-badge">02</span>
+      <span class="step-title">סרטון</span>
+    </div>
     <div class="dropzone" id="dropzone">
       <div class="icon">🎬</div>
       <div class="main">לחצו כאן לבחירת סרטון, או גררו לתוך האזור</div>
@@ -330,22 +458,28 @@
     </div>
     <input type="file" id="fileInput" accept="video/*,audio/*">
     <p class="hint">גודל קובץ מקסימלי: 25MB (מגבלה של OpenAI). סרטונים כבדים יותר — כדאי לדחוס קודם.</p>
-  </section>
 
-  <section id="compressSection" style="display:none">
-    <span class="label">דחיסת הסרטון</span>
-    <div class="compress-row">
-      <div class="compress-info">משקל נוכחי: <b id="origSize"></b></div>
+    <div id="compressSection" style="display:none">
+      <div class="step-sub">
+        <div class="compress-head">
+          <div class="compress-info">משקל נוכחי: <b id="origSize"></b></div>
+          <button class="mini-toggle" id="compressToggle" type="button" aria-expanded="true">דחיסה <span class="chev">⌄</span></button>
+        </div>
+        <div class="step-body-wrap expanded" id="compressBodyWrap">
+          <div class="step-body-inner">
+            <div class="quality-picker" id="qualityPicker">
+              <button data-preset="high" class="active">איכות גבוהה</button>
+              <button data-preset="balanced">מאוזן</button>
+              <button data-preset="small">קובץ קטן</button>
+            </div>
+            <button class="btn-primary" id="compressBtn">דחיסת הסרטון</button>
+            <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="compress-done" id="compressDone"></div>
+            <p class="hint">הדחיסה רצה כולה בדפדפן (בלי להעלות כלום לשום שרת), ומקטינה רזולוציה וקצב סיביות כדי לרדת מתחת ל-25MB. בסרטונים ארוכים זה יכול לקחת כמה דקות, ובמובייל לפעמים איטי יותר.</p>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="quality-picker" id="qualityPicker">
-      <button data-preset="high" class="active">איכות גבוהה</button>
-      <button data-preset="balanced">מאוזן</button>
-      <button data-preset="small">קובץ קטן</button>
-    </div>
-    <button class="btn-primary" id="compressBtn">דחיסת הסרטון</button>
-    <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="compress-done" id="compressDone"></div>
-    <p class="hint">הדחיסה רצה כולה בדפדפן (בלי להעלות כלום לשום שרת), ומקטינה רזולוציה וקצב סיביות כדי לרדת מתחת ל-25MB. בסרטונים ארוכים זה יכול לקחת כמה דקות, ובמובייל לפעמים איטי יותר.</p>
   </section>
 
   <div class="video-stage" id="videoStage" style="display:none">
@@ -353,15 +487,22 @@
     <div class="caption-overlay"><span id="captionText"></span></div>
   </div>
 
-  <section id="actionSection" style="display:none">
+  <section class="step" id="actionSection" style="display:none">
+    <div class="step-static-head">
+      <span class="step-badge">03</span>
+      <span class="step-title">יצירת כתוביות</span>
+    </div>
     <button class="btn-primary" id="generateBtn">יצירת כתוביות</button>
     <div class="status" id="status"><div class="spinner"></div><span id="statusText"></span></div>
     <div class="timecode-strip" id="segList"></div>
     <button class="btn-secondary" id="downloadBtn" style="display:none">הורדת קובץ SRT</button>
   </section>
 
-  <section id="styleSection" style="display:none">
-    <span class="label">סגנון כתוביות</span>
+  <section class="step" id="styleSection" style="display:none">
+    <div class="step-static-head">
+      <span class="step-badge">04</span>
+      <span class="step-title">סגנון וייצוא</span>
+    </div>
 
     <div class="style-row">
       <span class="label" style="margin:0">גודל טקסט</span>
@@ -398,15 +539,11 @@
     <p class="hint">שורף את הכתוביות לתוך הווידאו עצמו ליצירת קובץ mp4 חדש להורדה. תהליך כבד — יכול לקחת כמה דקות, במיוחד במובייל.</p>
   </section>
 
-  <footer>STUDIO · TIMECODE 00:00:00:00</footer>
+  <footer>נוצר באהבה עבור יוצרי תוכן בעברית 💛</footer>
 </div>
 
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js" crossorigin="anonymous"></script>
 <script>
-  // sprockets decoration
-  const sprocketsEl = document.getElementById('sprockets');
-  for(let i=0;i<40;i++){ sprocketsEl.innerHTML += '<span></span>'; }
-
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
   const fname = document.getElementById('fname');
@@ -439,6 +576,86 @@
   const exportBtn = document.getElementById('exportBtn');
   const exportProgressTrack = document.getElementById('exportProgressTrack');
   const exportProgressFill = document.getElementById('exportProgressFill');
+  const settingsHead = document.getElementById('settingsHead');
+  const settingsBodyWrap = document.getElementById('settingsBodyWrap');
+  const settingsSummary = document.getElementById('settingsSummary');
+  const proxyUrlInput = document.getElementById('proxyUrl');
+  const promptTextInput = document.getElementById('promptText');
+  const compressToggle = document.getElementById('compressToggle');
+  const compressBodyWrap = document.getElementById('compressBodyWrap');
+
+  const forgetSettingsBtn = document.getElementById('forgetSettingsBtn');
+  const STORAGE_KEYS = { apiKey: 'subgen_apiKey', proxyUrl: 'subgen_proxyUrl', promptText: 'subgen_promptText' };
+
+  function loadStoredSettings(){
+    try{
+      apiKeyInput.value = localStorage.getItem(STORAGE_KEYS.apiKey) || '';
+      proxyUrlInput.value = localStorage.getItem(STORAGE_KEYS.proxyUrl) || '';
+      promptTextInput.value = localStorage.getItem(STORAGE_KEYS.promptText) || '';
+    }catch(e){ /* localStorage unavailable (e.g. private mode) — just start empty */ }
+  }
+  function saveSettingToStorage(key, value){
+    try{
+      if(value) localStorage.setItem(key, value);
+      else localStorage.removeItem(key);
+    }catch(e){ /* ignore */ }
+  }
+  function forgetStoredSettings(){
+    try{
+      Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
+    }catch(e){ /* ignore */ }
+    apiKeyInput.value = '';
+    proxyUrlInput.value = '';
+    promptTextInput.value = '';
+    updateSettingsSummary();
+    setSettingsExpanded(true);
+    apiKeyInput.focus();
+  }
+
+  function setSettingsExpanded(expanded){
+    settingsHead.setAttribute('aria-expanded', String(expanded));
+    settingsBodyWrap.classList.toggle('expanded', expanded);
+    if(!expanded) updateSettingsSummary();
+  }
+  function updateSettingsSummary(){
+    const key = apiKeyInput.value.trim();
+    const proxy = proxyUrlInput.value.trim();
+    const keyPart = key ? ('מפתח sk-***' + key.slice(-4)) : 'אין מפתח';
+    const proxyPart = proxy ? 'Worker מוגדר' : 'אין Worker';
+    settingsSummary.textContent = `${keyPart} · ${proxyPart}`;
+  }
+  settingsHead.addEventListener('click', () => {
+    setSettingsExpanded(settingsHead.getAttribute('aria-expanded') !== 'true');
+  });
+  apiKeyInput.addEventListener('input', () => saveSettingToStorage(STORAGE_KEYS.apiKey, apiKeyInput.value.trim()));
+  proxyUrlInput.addEventListener('input', () => saveSettingToStorage(STORAGE_KEYS.proxyUrl, proxyUrlInput.value.trim()));
+  promptTextInput.addEventListener('input', () => saveSettingToStorage(STORAGE_KEYS.promptText, promptTextInput.value.trim()));
+  [apiKeyInput, proxyUrlInput, promptTextInput].forEach(el => {
+    el.addEventListener('input', updateSettingsSummary);
+  });
+  forgetSettingsBtn.addEventListener('click', forgetStoredSettings);
+
+  loadStoredSettings();
+  updateSettingsSummary();
+  let settingsAutoCollapsedOnce = false;
+  if(apiKeyInput.value.trim() && proxyUrlInput.value.trim()){
+    // Collapse instantly on first paint (no transition) — animating a
+    // collapse before the expanded state has ever actually been painted
+    // leaves the grid-rows transition stuck at an intermediate height.
+    settingsBodyWrap.style.transition = 'none';
+    setSettingsExpanded(false);
+    void settingsBodyWrap.offsetHeight;
+    settingsBodyWrap.style.transition = '';
+    settingsAutoCollapsedOnce = true;
+  }
+
+  function setCompressExpanded(expanded){
+    compressToggle.setAttribute('aria-expanded', String(expanded));
+    compressBodyWrap.classList.toggle('expanded', expanded);
+  }
+  compressToggle.addEventListener('click', () => {
+    setCompressExpanded(compressToggle.getAttribute('aria-expanded') !== 'true');
+  });
 
   let captionStyle = { fontSize: 22, color: '#ffffff', bgColor: '#000000', bgOpacity: 0.78, position: 'bottom' };
 
@@ -492,6 +709,12 @@
     if(file.size > 25 * 1024 * 1024){
       showStatus('הקובץ מעל 25MB — צריך לדחוס אותו למטה לפני יצירת כתוביות.', 'err');
     }
+
+    if(!settingsAutoCollapsedOnce){
+      setSettingsExpanded(false);
+      settingsAutoCollapsedOnce = true;
+    }
+    setCompressExpanded(true);
   }
 
   function showStatus(msg, kind){
@@ -653,6 +876,7 @@
         showStatus('עדיין מעל 25MB — נסה הגדרת "קובץ קטן".', 'err');
       } else {
         showStatus('מוכן ליצירת כתוביות.', 'ok');
+        setCompressExpanded(false);
       }
     }catch(err){
       showStatus('הדחיסה נכשלה: ' + (err.message || 'שגיאה לא צפויה.'), 'err');
@@ -707,14 +931,15 @@
   generateBtn.addEventListener('click', async () => {
     const key = apiKeyInput.value.trim();
     const proxyUrl = document.getElementById('proxyUrl').value.trim();
-    if(!key){ showStatus('צריך להזין מפתח API קודם.', 'err'); return; }
-    if(!proxyUrl){ showStatus('צריך להזין כתובת שרת מתווך (Worker) קודם.', 'err'); return; }
+    if(!key){ setSettingsExpanded(true); showStatus('צריך להזין מפתח API קודם.', 'err'); return; }
+    if(!proxyUrl){ setSettingsExpanded(true); showStatus('צריך להזין כתובת שרת מתווך (Worker) קודם.', 'err'); return; }
     if(!currentFile){ showStatus('צריך לבחור סרטון קודם.', 'err'); return; }
     if(currentFile.size > 25 * 1024 * 1024){
       showStatus('הקובץ עדיין מעל 25MB — דחוס אותו קודם למעלה.', 'err');
       return;
     }
 
+    setCompressExpanded(false);
     generateBtn.disabled = true;
     showStatus('שולח את הסרטון ל-Whisper ומתמלל בעברית — זה יכול לקחת דקה או שתיים...');
 
@@ -822,7 +1047,7 @@
   let hebrewFontLoaded = false;
   async function ensureHebrewFont(ff){
     if(hebrewFontLoaded) return;
-    const fontData = await FFmpeg.fetchFile('https://raw.githubusercontent.com/openmaptiles/fonts/master/noto-sans/NotoSansHebrew-Regular.ttf');
+    const fontData = await FFmpeg.fetchFile('fonts/NotoSansHebrew-Regular.ttf');
     try{ ff.FS('mkdir', 'fonts'); }catch(e){}
     ff.FS('writeFile', 'fonts/NotoSansHebrew-Regular.ttf', fontData);
     hebrewFontLoaded = true;
@@ -851,15 +1076,22 @@
       ff.FS('writeFile', inName, await FFmpeg.fetchFile(currentFile));
       ff.FS('writeFile', 'subs.srt', buildSrt());
 
+      // Reference the preview's on-screen size so the burned-in captions end up
+      // the same relative size/position as what was shown in the live preview,
+      // regardless of the video's actual native resolution.
+      const refW = video.clientWidth || 760;
+      const refH = video.clientHeight || Math.round(refW * 9 / 16);
+
       const primary = toAssColor(captionStyle.color, 1);
       const back = toAssColor(captionStyle.bgColor, captionStyle.bgOpacity);
       const alignment = captionStyle.position === 'top' ? 8 : 2;
-      const forceStyle = `FontName=Noto Sans Hebrew,FontSize=${captionStyle.fontSize},PrimaryColour=${primary},BackColour=${back},BorderStyle=3,Outline=0,Shadow=0,MarginV=40,Alignment=${alignment}`;
+      const marginV = Math.round(refH * 0.06);
+      const forceStyle = `FontName=Noto Sans Hebrew,FontSize=${captionStyle.fontSize},PrimaryColour=${primary},BackColour=${back},BorderStyle=3,Outline=6,Shadow=0,MarginV=${marginV},Alignment=${alignment}`;
 
       showStatus('שורף את הכתוביות לתוך הווידאו...');
       await ff.run(
         '-i', inName,
-        '-vf', `subtitles=subs.srt:fontsdir=fonts:force_style='${forceStyle}'`,
+        '-vf', `subtitles=subs.srt:original_size=${refW}x${refH}:fontsdir=fonts:force_style='${forceStyle}'`,
         '-c:a', 'copy',
         outName
       );
