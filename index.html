@@ -8,58 +8,67 @@
 <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Rubik:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
   :root{
-    --bg: #121309;
-    --panel: #1b1c14;
-    --panel-2: #23241a;
-    --edge: #35362a;
-    --amber: #c98a3e;
-    --amber-dim: #8a5f2c;
-    --text: #eee8db;
-    --text-dim: #948e78;
-    --green: #7a9b6e;
-    --red: #b25b4f;
+    --bg: #0e0f0a;
+    --panel: #1c1d15;
+    --panel-2: #262719;
+    --edge: #38392a;
+    --edge-soft: rgba(255,255,255,0.045);
+    --amber: #dd9b4c;
+    --amber-dim: #96682e;
+    --amber-glow: rgba(221,155,76,0.28);
+    --text: #f2ecdd;
+    --text-dim: #9c9680;
+    --green: #85a878;
+    --red: #c06456;
+    --radius: 12px;
   }
   *{ box-sizing: border-box; }
   html,body{ margin:0; padding:0; }
   body{
     background: var(--bg);
     background-image:
-      radial-gradient(circle at 15% 10%, rgba(201,138,62,0.06), transparent 40%),
-      radial-gradient(circle at 85% 90%, rgba(201,138,62,0.04), transparent 40%);
+      radial-gradient(circle at 15% 8%, rgba(221,155,76,0.08), transparent 42%),
+      radial-gradient(circle at 88% 92%, rgba(221,155,76,0.05), transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(0,0,0,0), transparent 100%);
     color: var(--text);
     font-family: 'Rubik', sans-serif;
     min-height: 100vh;
-    padding: 28px 16px 80px;
+    padding: 32px 16px 80px;
   }
   .wrap{ max-width: 760px; margin: 0 auto; }
 
   /* Header — film slate motif */
-  header{ margin-bottom: 28px; }
+  header{ margin-bottom: 30px; }
   .eyebrow{
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     color: var(--amber);
     display:flex; align-items:center; gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
   .eyebrow::before{
     content:""; width: 7px; height:7px; border-radius:50%;
     background: var(--amber); display:inline-block;
     box-shadow: 0 0 8px var(--amber);
+    animation: recPulse 2s ease-in-out infinite;
+  }
+  @keyframes recPulse{
+    0%, 100%{ opacity:1; box-shadow: 0 0 8px var(--amber); }
+    50%{ opacity:.45; box-shadow: 0 0 3px var(--amber); }
   }
   h1{
     font-family: 'Frank Ruhl Libre', serif;
     font-weight: 900;
-    font-size: clamp(32px, 7vw, 44px);
-    margin: 0 0 8px;
+    font-size: clamp(32px, 7vw, 46px);
+    margin: 0 0 10px;
     letter-spacing: -0.01em;
   }
   h1 span{ color: var(--amber); }
   .sub{
     color: var(--text-dim);
     font-size: 14.5px;
-    line-height: 1.6;
+    line-height: 1.65;
     max-width: 46ch;
   }
 
@@ -74,18 +83,20 @@
   }
 
   section{
-    background: var(--panel);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 40%), var(--panel);
     border: 1px solid var(--edge);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.16);
+    border-top-color: var(--edge-soft);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 0 var(--edge-soft) inset, 0 8px 24px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.18);
+    transition: box-shadow .2s, transform .2s;
   }
   .step{ position:relative; overflow:hidden; }
   .step::before{
     content:""; position:absolute; top:0; bottom:0; right:0; width:3px;
     background: linear-gradient(180deg, var(--amber), var(--amber-dim));
-    opacity: .55;
+    opacity: .6;
   }
   .step-head{
     display:flex; align-items:center; gap:10px; width:100%;
@@ -94,16 +105,17 @@
     font-family: 'Rubik', sans-serif;
   }
   .step-static-head{
-    display:flex; align-items:center; gap:10px; margin-bottom:16px;
+    display:flex; align-items:center; gap:10px; margin-bottom:18px;
   }
   .step-badge{
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px; color: var(--amber); flex-shrink:0;
-    border: 1px solid var(--amber-dim); border-radius: 6px;
-    width: 26px; height: 26px;
+    border: 1px solid var(--amber-dim); border-radius: 7px;
+    background: rgba(221,155,76,0.08);
+    width: 27px; height: 27px;
     display:flex; align-items:center; justify-content:center;
   }
-  .step-title{ font-size: 14.5px; font-weight: 500; flex-shrink:0; }
+  .step-title{ font-size: 14.5px; font-weight: 600; flex-shrink:0; }
   .step-summary{
     font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
     color: var(--text-dim); flex:1; min-width:0;
@@ -147,31 +159,42 @@
     background: var(--panel-2);
     border: 1px solid var(--edge);
     color: var(--text);
-    padding: 12px 14px;
-    border-radius: 7px;
+    padding: 13px 14px;
+    border-radius: 8px;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 13px;
     direction: ltr;
     text-align: left;
+    transition: border-color .15s, box-shadow .15s;
   }
   input[type=password]:focus, input[type=text]:focus{
     outline: none; border-color: var(--amber-dim);
+    box-shadow: 0 0 0 3px var(--amber-glow);
   }
   .hint{ font-size: 12px; color: var(--text-dim); margin-top: 8px; line-height:1.6; }
   .hint a{ color: var(--amber); }
 
+  .link-btn{
+    background:none; border:none; width:auto; padding:0;
+    color: var(--text-dim); font-size: 11.5px;
+    font-family: 'IBM Plex Mono', monospace; text-decoration: underline;
+    text-underline-offset: 3px; cursor:pointer;
+  }
+  .link-btn:hover{ color: var(--amber); }
+
   .dropzone{
     border: 1.5px dashed var(--edge);
-    border-radius: 8px;
-    padding: 30px 16px;
+    border-radius: 10px;
+    padding: 32px 16px;
     text-align: center;
     cursor: pointer;
-    transition: border-color .15s, background .15s;
+    transition: border-color .15s, background .15s, transform .15s;
   }
   .dropzone:hover, .dropzone.drag{
     border-color: var(--amber-dim);
-    background: rgba(201,138,62,0.04);
+    background: rgba(221,155,76,0.05);
   }
+  .dropzone:active{ transform: scale(.995); }
   .dropzone .icon{ font-size: 26px; margin-bottom: 8px; }
   .dropzone .main{ font-size: 14px; }
   .dropzone .fname{
@@ -209,20 +232,26 @@
     font-weight: 500;
     font-size: 14.5px;
     border: none;
-    border-radius: 7px;
+    border-radius: 8px;
     padding: 13px 20px;
     cursor: pointer;
     width: 100%;
-    transition: filter .15s, opacity .15s;
+    transition: filter .15s, opacity .15s, transform .1s, box-shadow .15s;
   }
   button:disabled{ opacity: .45; cursor: not-allowed; }
-  .btn-primary{ background: var(--amber); color: #1a1200; font-weight:600; }
-  .btn-primary:hover:not(:disabled){ filter: brightness(1.08); }
+  .btn-primary{
+    background: linear-gradient(180deg, #e5aa5e, var(--amber));
+    color: #1a1200; font-weight:600;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 6px 16px rgba(221,155,76,0.22);
+  }
+  .btn-primary:hover:not(:disabled){ filter: brightness(1.06); box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 8px 20px rgba(221,155,76,0.32); }
+  .btn-primary:active:not(:disabled){ transform: translateY(1px); }
   .btn-secondary{
-    background: transparent; color: var(--text);
+    background: var(--panel-2); color: var(--text);
     border: 1px solid var(--edge); margin-top: 8px;
   }
   .btn-secondary:hover:not(:disabled){ border-color: var(--amber-dim); }
+  .btn-secondary:active:not(:disabled){ transform: translateY(1px); }
 
   .status{
     font-family: 'IBM Plex Mono', monospace;
@@ -369,7 +398,7 @@
         <div class="settings-field">
           <span class="label">מפתח API של OpenAI</span>
           <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
-          <p class="hint">המפתח נשמר רק בזיכרון הדף הזה, לא מועבר לשום מקום חוץ מ-OpenAI, ונעלם ברגע שתסגור את הדף. אפשר ליצור מפתח בכתובת <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></p>
+          <p class="hint">המפתח נשמר בדפדפן הזה בלבד (על המכשיר שלכם), ולא מועבר לשום מקום חוץ מ-OpenAI. אפשר ליצור מפתח בכתובת <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></p>
         </div>
 
         <div class="settings-field">
@@ -383,6 +412,8 @@
           <input type="text" id="promptText" placeholder="לדוגמה: שיעור בחסידות, אהבת תמים, שמות של אנשים..." autocomplete="off">
           <p class="hint">מונחים, שמות או ז'רגון שחוזרים בסרטון — עוזר ל-Whisper לזהות אותם נכון במקום לנחש מילה דומה. לא חובה.</p>
         </div>
+
+        <button class="link-btn" id="forgetSettingsBtn" type="button">שכחו אותי — מחיקת הפרטים השמורים בדפדפן</button>
 
       </div>
     </div>
@@ -530,6 +561,34 @@
   const compressToggle = document.getElementById('compressToggle');
   const compressBodyWrap = document.getElementById('compressBodyWrap');
 
+  const forgetSettingsBtn = document.getElementById('forgetSettingsBtn');
+  const STORAGE_KEYS = { apiKey: 'subgen_apiKey', proxyUrl: 'subgen_proxyUrl', promptText: 'subgen_promptText' };
+
+  function loadStoredSettings(){
+    try{
+      apiKeyInput.value = localStorage.getItem(STORAGE_KEYS.apiKey) || '';
+      proxyUrlInput.value = localStorage.getItem(STORAGE_KEYS.proxyUrl) || '';
+      promptTextInput.value = localStorage.getItem(STORAGE_KEYS.promptText) || '';
+    }catch(e){ /* localStorage unavailable (e.g. private mode) — just start empty */ }
+  }
+  function saveSettingToStorage(key, value){
+    try{
+      if(value) localStorage.setItem(key, value);
+      else localStorage.removeItem(key);
+    }catch(e){ /* ignore */ }
+  }
+  function forgetStoredSettings(){
+    try{
+      Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
+    }catch(e){ /* ignore */ }
+    apiKeyInput.value = '';
+    proxyUrlInput.value = '';
+    promptTextInput.value = '';
+    updateSettingsSummary();
+    setSettingsExpanded(true);
+    apiKeyInput.focus();
+  }
+
   function setSettingsExpanded(expanded){
     settingsHead.setAttribute('aria-expanded', String(expanded));
     settingsBodyWrap.classList.toggle('expanded', expanded);
@@ -545,11 +604,21 @@
   settingsHead.addEventListener('click', () => {
     setSettingsExpanded(settingsHead.getAttribute('aria-expanded') !== 'true');
   });
+  apiKeyInput.addEventListener('input', () => saveSettingToStorage(STORAGE_KEYS.apiKey, apiKeyInput.value.trim()));
+  proxyUrlInput.addEventListener('input', () => saveSettingToStorage(STORAGE_KEYS.proxyUrl, proxyUrlInput.value.trim()));
+  promptTextInput.addEventListener('input', () => saveSettingToStorage(STORAGE_KEYS.promptText, promptTextInput.value.trim()));
   [apiKeyInput, proxyUrlInput, promptTextInput].forEach(el => {
     el.addEventListener('input', updateSettingsSummary);
   });
+  forgetSettingsBtn.addEventListener('click', forgetStoredSettings);
+
+  loadStoredSettings();
   updateSettingsSummary();
   let settingsAutoCollapsedOnce = false;
+  if(apiKeyInput.value.trim() && proxyUrlInput.value.trim()){
+    setSettingsExpanded(false);
+    settingsAutoCollapsedOnce = true;
+  }
 
   function setCompressExpanded(expanded){
     compressToggle.setAttribute('aria-expanded', String(expanded));
