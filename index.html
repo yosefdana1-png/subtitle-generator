@@ -236,7 +236,7 @@
     text-align:center;
     pointer-events:none;
   }
-  .caption-overlay span{
+  .caption-overlay > span{
     background: rgba(10,10,6,0.78);
     color:#fff;
     padding: 6px 14px;
@@ -245,6 +245,16 @@
     font-weight: 500;
     display:inline-block;
     line-height:1.5;
+  }
+  .emph-word{
+    font-weight: 800;
+    font-size: 1.22em;
+    background: var(--accent-grad);
+    color: #2a1220;
+    padding: 1px 8px;
+    border-radius: 6px;
+    display: inline-block;
+    margin: 0 1px;
   }
 
   button{
@@ -840,7 +850,8 @@
         chunks.push({
           start: cur[0].start,
           end: cur[cur.length - 1].end,
-          text: cur.map(w => w.word.trim()).join(' ').trim()
+          text: cur.map(w => w.word.trim()).join(' ').trim(),
+          words: cur.map(w => ({ word: w.word.trim(), start: w.start, end: w.end, emphasis: !!w.emphasis }))
         });
         cur = [];
       }
@@ -861,6 +872,53 @@
     flush();
 
     return chunks.filter(c => c.text.length > 0);
+  }
+
+  // Flags words that were spoken noticeably louder than the surrounding
+  // speech (real vocal emphasis, not a text heuristic) by decoding the
+  // audio and comparing each word's RMS loudness against the median
+  // across the whole clip. Degrades silently (no emphasis) if audio
+  // decoding isn't available — this is a nice-to-have, not required for
+  // captions to work.
+  async function detectEmphasis(words, file){
+    const flags = new Array(words.length).fill(false);
+    try{
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if(!AudioCtx || !words.length) return flags;
+      const audioCtx = new AudioCtx();
+      const arrayBuffer = await file.arrayBuffer();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      const sampleRate = audioBuffer.sampleRate;
+      const channels = [];
+      for(let c = 0; c < audioBuffer.numberOfChannels; c++) channels.push(audioBuffer.getChannelData(c));
+      const numSamples = channels[0].length;
+
+      const rmsFor = (startSec, endSec) => {
+        const startIdx = Math.max(0, Math.floor(startSec * sampleRate));
+        const endIdx = Math.min(numSamples, Math.ceil(endSec * sampleRate));
+        if(endIdx <= startIdx) return 0;
+        let sumSq = 0;
+        for(let i = startIdx; i < endIdx; i++){
+          let sample = 0;
+          for(let c = 0; c < channels.length; c++) sample += channels[c][i];
+          sample /= channels.length;
+          sumSq += sample * sample;
+        }
+        return Math.sqrt(sumSq / (endIdx - startIdx));
+      };
+
+      const energies = words.map(w => rmsFor(w.start, w.end));
+      const sorted = energies.filter(e => e > 0).slice().sort((a, b) => a - b);
+      audioCtx.close();
+      if(sorted.length < 3) return flags;
+      const median = sorted[Math.floor(sorted.length / 2)];
+      if(median <= 0) return flags;
+      const THRESHOLD = 1.5;
+      energies.forEach((e, i) => { flags[i] = e > median * THRESHOLD; });
+      return flags;
+    }catch(e){
+      return flags;
+    }
   }
 
   function applyStyleToOverlay(){
@@ -1129,9 +1187,14 @@
       }
 
       const data = await res.json();
-      segments = (data.words && data.words.length)
-        ? chunkWordsIntoCaptions(data.words)
-        : (data.segments || []).map(s => ({ start: s.start, end: s.end, text: s.text.trim() }));
+      if(data.words && data.words.length){
+        showStatus('מזהה מילים שהודגשו בדיבור...');
+        const emphasisFlags = await detectEmphasis(data.words, uploadFile);
+        data.words.forEach((w, i) => { w.emphasis = emphasisFlags[i]; });
+        segments = chunkWordsIntoCaptions(data.words);
+      } else {
+        segments = (data.segments || []).map(s => ({ start: s.start, end: s.end, text: s.text.trim() }));
+      }
 
       if(segments.length === 0){
         showStatus('לא זוהה דיבור בסרטון.', 'err');
@@ -1163,9 +1226,13 @@
       tc.addEventListener('click', () => { video.currentTime = seg.start; video.play(); });
       const txt = document.createElement('span');
       txt.className = 'txt';
-      txt.textContent = seg.text;
+      renderWordsInto(txt, seg);
       txt.contentEditable = 'true';
-      txt.addEventListener('blur', () => { segments[i].text = txt.textContent.trim(); });
+      txt.addEventListener('blur', () => {
+        const newText = txt.textContent.trim();
+        if(newText !== seg.text) seg.words = null; // edited freehand — emphasis timing no longer applies
+        seg.text = newText;
+      });
       txt.addEventListener('click', e => e.stopPropagation());
       row.appendChild(tc);
       row.appendChild(txt);
@@ -1174,22 +1241,44 @@
     segList.classList.add('show');
   }
 
+  // Renders a segment's text into `el`, splitting into per-word spans
+  // (highlighting emphasized ones) when word-level data is available,
+  // otherwise falling back to plain text.
+  function renderWordsInto(el, seg){
+    el.innerHTML = '';
+    if(!seg || !seg.words || !seg.words.length){
+      el.textContent = seg ? seg.text : '';
+      return;
+    }
+    seg.words.forEach((w, i) => {
+      if(i > 0) el.appendChild(document.createTextNode(' '));
+      const span = document.createElement('span');
+      span.textContent = w.word;
+      if(w.emphasis) span.className = 'emph-word';
+      el.appendChild(span);
+    });
+  }
+
   video.addEventListener('timeupdate', () => {
     const t = video.currentTime;
     const seg = segments.find(s => t >= s.start && t <= s.end);
-    captionText.textContent = seg ? seg.text : '';
+    renderWordsInto(captionText, seg);
   });
 
-  function buildSrt(){
+  function buildSrt(includeEmphasis){
     let srt = '';
     segments.forEach((seg, i) => {
-      srt += `${i+1}\n${fmtTime(seg.start)} --> ${fmtTime(seg.end)}\n${seg.text}\n\n`;
+      let text = seg.text;
+      if(includeEmphasis && seg.words && seg.words.length){
+        text = seg.words.map(w => w.emphasis ? `<b><font color="#ffcc33">${w.word}</font></b>` : w.word).join(' ');
+      }
+      srt += `${i+1}\n${fmtTime(seg.start)} --> ${fmtTime(seg.end)}\n${text}\n\n`;
     });
     return srt;
   }
 
   downloadBtn.addEventListener('click', () => {
-    const blob = new Blob([buildSrt()], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([buildSrt(false)], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -1228,7 +1317,7 @@
       const inName = 'burn_in_' + Date.now() + '.mp4';
       const outName = 'burn_out_' + Date.now() + '.mp4';
       ff.FS('writeFile', inName, await FFmpeg.fetchFile(currentFile));
-      ff.FS('writeFile', 'subs.srt', buildSrt());
+      ff.FS('writeFile', 'subs.srt', buildSrt(true));
 
       // Reference the preview's on-screen size so the burned-in captions end up
       // the same relative size/position as what was shown in the live preview,
