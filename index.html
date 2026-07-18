@@ -275,6 +275,12 @@
   </section>
 
   <section>
+    <span class="label">כתובת שרת מתווך (Worker)</span>
+    <input type="text" id="proxyUrl" placeholder="https://your-worker.your-name.workers.dev" autocomplete="off">
+    <p class="hint">OpenAI חוסמת קריאות ישירות מהדפדפן, אז צריך שרת קטנטן שרק מעביר את הבקשה הלאה. הכתובת שתקבל אחרי הקמת ה-Worker נכנסת כאן.</p>
+  </section>
+
+  <section>
     <span class="label">סרטון</span>
     <div class="dropzone" id="dropzone">
       <div class="icon">🎬</div>
@@ -498,7 +504,9 @@
 
   generateBtn.addEventListener('click', async () => {
     const key = apiKeyInput.value.trim();
+    const proxyUrl = document.getElementById('proxyUrl').value.trim();
     if(!key){ showStatus('צריך להזין מפתח API קודם.', 'err'); return; }
+    if(!proxyUrl){ showStatus('צריך להזין כתובת שרת מתווך (Worker) קודם.', 'err'); return; }
     if(!currentFile){ showStatus('צריך לבחור סרטון קודם.', 'err'); return; }
     if(currentFile.size > 25 * 1024 * 1024){
       showStatus('הקובץ עדיין מעל 25MB — דחוס אותו קודם למעלה.', 'err');
@@ -515,7 +523,7 @@
       formData.append('language', 'he');
       formData.append('response_format', 'verbose_json');
 
-      const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      const res = await fetch(proxyUrl, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + key },
         body: formData
