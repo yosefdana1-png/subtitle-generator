@@ -591,6 +591,8 @@
       showStatus('זיהוי אוטומטי נכשל — ודא שהסרטון מתנגן (לחץ פליי לרגע) ונסה שוב.', 'err');
     }
   });
+
+  compressBtn.addEventListener('click', async () => {
     if(!currentFile){ return; }
     if(typeof SharedArrayBuffer === 'undefined'){
       showStatus('הדחיסה לא זמינה באירוח הנוכחי (GitHub Pages) — חסרה תמיכת דפדפן שדורשת הגדרות שרת מיוחדות. אפשר לדלג על דחיסה ולנסות ישירות "יצירת כתוביות", או לעבור לאירוח אחר בהמשך.', 'err');
