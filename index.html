@@ -502,6 +502,40 @@
     });
   }
 
+  async function ensureFfmpegLoaded(){
+    if(!ffmpegInstance){
+      ffmpegInstance = FFmpeg.createFFmpeg({
+        log: false,
+        corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
+      });
+      await ffmpegInstance.load();
+    }
+    return ffmpegInstance;
+  }
+
+  async function convertToMp4(file){
+    const ff = await ensureFfmpegLoaded();
+    const inName = 'conv_in_' + Date.now();
+    const outName = 'conv_out_' + Date.now() + '.mp4';
+    ff.FS('writeFile', inName, await FFmpeg.fetchFile(file));
+
+    try{
+      // Try a fast stream copy first (just repackages the container, no re-encode).
+      await ff.run('-i', inName, '-c', 'copy', '-movflags', '+faststart', outName);
+    }catch(e){
+      // Fall back to a real re-encode if the source codec isn't mp4-compatible.
+      await ff.run('-i', inName, '-c:v', 'libx264', '-preset', 'ultrafast', '-c:a', 'aac', outName);
+    }
+
+    const data = ff.FS('readFile', outName);
+    ff.FS('unlink', inName);
+    ff.FS('unlink', outName);
+
+    const blob = new Blob([data.buffer], { type: 'video/mp4' });
+    const safeName = file.name.replace(/\.[^.]+$/, '') + '.mp4';
+    return new File([blob], safeName, { type: 'video/mp4' });
+  }
+
   generateBtn.addEventListener('click', async () => {
     const key = apiKeyInput.value.trim();
     const proxyUrl = document.getElementById('proxyUrl').value.trim();
@@ -522,8 +556,8 @@
       const currentExt = (currentFile.name.split('.').pop() || '').toLowerCase();
       let uploadFile = currentFile;
       if(!SUPPORTED_EXT.includes(currentExt)){
-        const safeName = currentFile.name.replace(/\.[^.]+$/, '') + '.mp4';
-        uploadFile = new File([currentFile], safeName, { type: 'video/mp4' });
+        showStatus('ממיר את הקובץ לפורמט נתמך...');
+        uploadFile = await convertToMp4(currentFile);
       }
       formData.append('file', uploadFile);
       formData.append('model', 'whisper-1');
