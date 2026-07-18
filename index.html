@@ -5,31 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>כתובית — יצירת כתוביות אוטומטית</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Rubik:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
   :root{
-    --bg: #0e0f0a;
-    --panel: #1c1d15;
-    --panel-2: #262719;
-    --edge: #38392a;
-    --edge-soft: rgba(255,255,255,0.045);
-    --amber: #dd9b4c;
-    --amber-dim: #96682e;
-    --amber-glow: rgba(221,155,76,0.28);
-    --text: #f2ecdd;
-    --text-dim: #9c9680;
-    --green: #85a878;
-    --red: #c06456;
-    --radius: 12px;
+    --bg: #17151f;
+    --panel: #211f2c;
+    --panel-2: #2b2839;
+    --edge: rgba(255,255,255,0.09);
+    --edge-soft: rgba(255,255,255,0.05);
+    --amber: #ff8a65;
+    --amber-dim: #d16c8f;
+    --amber-glow: rgba(255,138,101,0.3);
+    --accent-grad: linear-gradient(135deg, #ff9966, #ff5f9e);
+    --text: #f6f2ef;
+    --text-dim: #a79fc0;
+    --green: #5fd4a0;
+    --red: #ff6b6b;
+    --radius: 18px;
+    --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
   }
   *{ box-sizing: border-box; }
   html,body{ margin:0; padding:0; }
   body{
     background: var(--bg);
     background-image:
-      radial-gradient(circle at 15% 8%, rgba(221,155,76,0.08), transparent 42%),
-      radial-gradient(circle at 88% 92%, rgba(221,155,76,0.05), transparent 45%),
-      radial-gradient(circle at 50% 50%, rgba(0,0,0,0), transparent 100%);
+      radial-gradient(circle at 12% 8%, rgba(255,153,102,0.14), transparent 45%),
+      radial-gradient(circle at 90% 15%, rgba(255,95,158,0.1), transparent 45%),
+      radial-gradient(circle at 80% 95%, rgba(255,153,102,0.08), transparent 45%);
     color: var(--text);
     font-family: 'Rubik', sans-serif;
     min-height: 100vh;
@@ -37,34 +39,38 @@
   }
   .wrap{ max-width: 760px; margin: 0 auto; }
 
-  /* Header — film slate motif */
-  header{ margin-bottom: 30px; }
+  header{ margin-bottom: 26px; }
   .eyebrow{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.14em;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
     color: var(--amber);
     display:flex; align-items:center; gap: 8px;
     margin-bottom: 12px;
   }
   .eyebrow::before{
-    content:""; width: 7px; height:7px; border-radius:50%;
-    background: var(--amber); display:inline-block;
-    box-shadow: 0 0 8px var(--amber);
+    content:""; width: 8px; height:8px; border-radius:50%;
+    background: var(--accent-grad); display:inline-block;
+    box-shadow: 0 0 10px var(--amber-glow);
     animation: recPulse 2s ease-in-out infinite;
   }
   @keyframes recPulse{
-    0%, 100%{ opacity:1; box-shadow: 0 0 8px var(--amber); }
-    50%{ opacity:.45; box-shadow: 0 0 3px var(--amber); }
+    0%, 100%{ transform: scale(1); opacity:1; }
+    50%{ transform: scale(1.25); opacity:.7; }
   }
   h1{
-    font-family: 'Frank Ruhl Libre', serif;
+    font-family: 'Rubik', sans-serif;
     font-weight: 900;
-    font-size: clamp(32px, 7vw, 46px);
+    font-size: clamp(32px, 7vw, 48px);
     margin: 0 0 10px;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
-  h1 span{ color: var(--amber); }
+  h1 span{
+    background: var(--accent-grad);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
   .sub{
     color: var(--text-dim);
     font-size: 14.5px;
@@ -72,14 +78,20 @@
     max-width: 46ch;
   }
 
-  /* Sprocket divider — the signature element */
+  /* Flowing divider — the signature element */
   .sprockets{
-    display:flex; gap:6px; margin: 22px 0;
-    overflow:hidden;
+    height: 3px; margin: 24px 0; border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--edge) 15%, var(--edge) 85%, transparent);
+    position: relative; overflow: hidden;
   }
-  .sprockets span{
-    width:8px; height:8px; border:1.5px solid var(--edge);
-    border-radius:2px; flex-shrink:0;
+  .sprockets::after{
+    content:""; position:absolute; inset:0; width: 40%;
+    background: var(--accent-grad); border-radius: 999px; opacity:.55;
+    animation: flowLine 3.5s ease-in-out infinite;
+  }
+  @keyframes flowLine{
+    0%{ transform: translateX(-100%); }
+    100%{ transform: translateX(250%); }
   }
 
   section{
@@ -94,9 +106,9 @@
   }
   .step{ position:relative; overflow:hidden; }
   .step::before{
-    content:""; position:absolute; top:0; bottom:0; right:0; width:3px;
-    background: linear-gradient(180deg, var(--amber), var(--amber-dim));
-    opacity: .6;
+    content:""; position:absolute; top:0; bottom:0; right:0; width:4px;
+    background: var(--accent-grad);
+    opacity: .7;
   }
   .step-head{
     display:flex; align-items:center; gap:10px; width:100%;
@@ -108,14 +120,15 @@
     display:flex; align-items:center; gap:10px; margin-bottom:18px;
   }
   .step-badge{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; color: var(--amber); flex-shrink:0;
-    border: 1px solid var(--amber-dim); border-radius: 7px;
-    background: rgba(221,155,76,0.08);
-    width: 27px; height: 27px;
+    font-family: 'Rubik', sans-serif; font-weight: 700;
+    font-size: 12px; color: #2a1220; flex-shrink:0;
+    border-radius: 999px;
+    background: var(--accent-grad);
+    box-shadow: 0 3px 10px rgba(255,95,158,0.28);
+    width: 28px; height: 28px;
     display:flex; align-items:center; justify-content:center;
   }
-  .step-title{ font-size: 14.5px; font-weight: 600; flex-shrink:0; }
+  .step-title{ font-size: 15px; font-weight: 700; flex-shrink:0; }
   .step-summary{
     font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
     color: var(--text-dim); flex:1; min-width:0;
@@ -140,11 +153,12 @@
   .mini-toggle{
     display:flex; align-items:center; gap:6px;
     background: var(--panel-2); border: 1px solid var(--edge);
-    color: var(--text-dim); font-family:'IBM Plex Mono', monospace;
-    font-size: 11.5px; padding: 6px 10px; border-radius: 6px;
+    color: var(--text-dim); font-family:'Rubik', sans-serif; font-weight:500;
+    font-size: 12px; padding: 7px 14px; border-radius: 999px;
     cursor:pointer; width:auto; flex-shrink:0;
+    transition: border-color .15s, color .15s;
   }
-  .mini-toggle:hover{ border-color: var(--amber-dim); }
+  .mini-toggle:hover{ border-color: var(--amber-dim); color: var(--text); }
   .label{
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
@@ -159,8 +173,8 @@
     background: var(--panel-2);
     border: 1px solid var(--edge);
     color: var(--text);
-    padding: 13px 14px;
-    border-radius: 8px;
+    padding: 13px 16px;
+    border-radius: 14px;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 13px;
     direction: ltr;
@@ -169,7 +183,7 @@
   }
   input[type=password]:focus, input[type=text]:focus{
     outline: none; border-color: var(--amber-dim);
-    box-shadow: 0 0 0 3px var(--amber-glow);
+    box-shadow: 0 0 0 4px var(--amber-glow);
   }
   .hint{ font-size: 12px; color: var(--text-dim); margin-top: 8px; line-height:1.6; }
   .hint a{ color: var(--amber); }
@@ -177,22 +191,28 @@
   .link-btn{
     background:none; border:none; width:auto; padding:0;
     color: var(--text-dim); font-size: 11.5px;
-    font-family: 'IBM Plex Mono', monospace; text-decoration: underline;
+    font-family: 'Rubik', sans-serif; text-decoration: underline;
     text-underline-offset: 3px; cursor:pointer;
   }
   .link-btn:hover{ color: var(--amber); }
 
   .dropzone{
-    border: 1.5px dashed var(--edge);
-    border-radius: 10px;
-    padding: 32px 16px;
+    border: 2px dashed var(--edge);
+    border-radius: 16px;
+    padding: 34px 16px;
     text-align: center;
     cursor: pointer;
-    transition: border-color .15s, background .15s, transform .15s;
+    transition: border-color .2s var(--ease-bounce), background .2s, transform .15s var(--ease-bounce);
   }
-  .dropzone:hover, .dropzone.drag{
+  .dropzone:hover{
     border-color: var(--amber-dim);
-    background: rgba(221,155,76,0.05);
+    background: rgba(255,138,101,0.06);
+    transform: scale(1.005);
+  }
+  .dropzone.drag{
+    border-color: var(--amber);
+    background: rgba(255,138,101,0.09);
+    transform: scale(1.01);
   }
   .dropzone:active{ transform: scale(.995); }
   .dropzone .icon{ font-size: 26px; margin-bottom: 8px; }
@@ -207,7 +227,7 @@
   input[type=file]{ display:none; }
 
   video{
-    width: 100%; display:block; border-radius: 7px;
+    width: 100%; display:block; border-radius: 14px;
     background:#000;
   }
   .video-stage{ position: relative; margin-bottom: 12px; }
@@ -229,28 +249,33 @@
 
   button{
     font-family: 'Rubik', sans-serif;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14.5px;
     border: none;
-    border-radius: 8px;
-    padding: 13px 20px;
+    border-radius: 999px;
+    padding: 14px 22px;
     cursor: pointer;
     width: 100%;
-    transition: filter .15s, opacity .15s, transform .1s, box-shadow .15s;
+    transition: filter .15s, opacity .15s, transform .15s var(--ease-bounce), box-shadow .2s;
   }
   button:disabled{ opacity: .45; cursor: not-allowed; }
   .btn-primary{
-    background: linear-gradient(180deg, #e5aa5e, var(--amber));
-    color: #1a1200; font-weight:600;
-    box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 6px 16px rgba(221,155,76,0.22);
+    background: var(--accent-grad);
+    background-size: 160% 160%;
+    color: #2a1220; font-weight:700;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 8px 20px rgba(255,95,158,0.28);
   }
-  .btn-primary:hover:not(:disabled){ filter: brightness(1.06); box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 8px 20px rgba(221,155,76,0.32); }
-  .btn-primary:active:not(:disabled){ transform: translateY(1px); }
+  .btn-primary:hover:not(:disabled){
+    background-position: 100% 0;
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 10px 26px rgba(255,95,158,0.4);
+  }
+  .btn-primary:active:not(:disabled){ transform: translateY(1px) scale(.99); }
   .btn-secondary{
     background: var(--panel-2); color: var(--text);
     border: 1px solid var(--edge); margin-top: 8px;
   }
-  .btn-secondary:hover:not(:disabled){ border-color: var(--amber-dim); }
+  .btn-secondary:hover:not(:disabled){ border-color: var(--amber-dim); color: var(--amber); transform: translateY(-1px); }
   .btn-secondary:active:not(:disabled){ transform: translateY(1px); }
 
   .status{
@@ -283,20 +308,21 @@
   .quality-picker button{
     flex:1; width:auto; padding: 9px 6px;
     background: var(--panel-2); border: 1px solid var(--edge);
-    color: var(--text-dim); font-size: 12.5px;
+    color: var(--text-dim); font-size: 12.5px; font-weight:500;
   }
   .quality-picker button.active{
-    border-color: var(--amber); color: var(--amber);
-    background: rgba(201,138,62,0.08);
+    border-color: transparent; color: #2a1220;
+    background: var(--accent-grad);
   }
   .progress-track{
-    width:100%; height:6px; border-radius:4px;
+    width:100%; height:7px; border-radius:999px;
     background: var(--panel-2); overflow:hidden; margin-top: 10px;
     display:none;
   }
   .progress-track.show{ display:block; }
   .progress-fill{
-    height:100%; width:0%; background: var(--amber);
+    height:100%; width:0%; background: var(--accent-grad);
+    border-radius:999px;
     transition: width .2s;
   }
   .compress-done{
@@ -316,18 +342,18 @@
     flex:1; accent-color: var(--amber); height: 4px;
   }
   input[type=color]{
-    width: 40px; height: 32px; border-radius: 6px; border: 1px solid var(--edge);
+    width: 40px; height: 32px; border-radius: 10px; border: 1px solid var(--edge);
     background: var(--panel-2); padding: 2px; flex-shrink:0;
   }
   .pos-picker{ display:flex; gap:8px; flex:1; }
   .pos-picker button{
     flex:1; width:auto; padding: 8px 6px;
     background: var(--panel-2); border: 1px solid var(--edge);
-    color: var(--text-dim); font-size: 12.5px;
+    color: var(--text-dim); font-size: 12.5px; font-weight:500;
   }
   .pos-picker button.active{
-    border-color: var(--amber); color: var(--amber);
-    background: rgba(201,138,62,0.08);
+    border-color: transparent; color: #2a1220;
+    background: var(--accent-grad);
   }
   .style-value{
     font-family: 'IBM Plex Mono', monospace;
@@ -356,7 +382,8 @@
     font-size: 13.5px;
     cursor: pointer;
   }
-  .seg:hover{ background: rgba(201,138,62,0.05); }
+  .seg{ border-radius: 10px; }
+  .seg:hover{ background: rgba(255,138,101,0.08); }
   .seg .tc{
     font-family: 'IBM Plex Mono', monospace;
     color: var(--amber-dim);
@@ -368,9 +395,9 @@
   .seg .txt{ flex:1; }
 
   footer{
-    text-align:center; color: var(--edge);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; margin-top: 40px;
+    text-align:center; color: var(--text-dim);
+    font-family: 'Rubik', sans-serif;
+    font-size: 12px; margin-top: 40px; opacity: .6;
   }
 </style>
 </head>
@@ -378,12 +405,12 @@
 <div class="wrap">
 
   <header>
-    <div class="eyebrow">REC · WHISPER-1 · עברית</div>
+    <div class="eyebrow">כתוביות בעברית תוך דקות</div>
     <h1>כתו<span>בית</span></h1>
     <p class="sub">מעלים סרטון, מקבלים כתוביות בעברית מסונכרנות אוטומטית, ומורידים קובץ SRT. התמלול רץ ישירות מהדפדפן שלך אל OpenAI — שום קובץ לא נשמר בשום מקום אחר.</p>
   </header>
 
-  <div class="sprockets" id="sprockets"></div>
+  <div class="sprockets"></div>
 
   <section class="step" id="settingsStep">
     <button class="step-head" id="settingsHead" type="button" aria-expanded="true">
@@ -512,15 +539,11 @@
     <p class="hint">שורף את הכתוביות לתוך הווידאו עצמו ליצירת קובץ mp4 חדש להורדה. תהליך כבד — יכול לקחת כמה דקות, במיוחד במובייל.</p>
   </section>
 
-  <footer>STUDIO · TIMECODE 00:00:00:00</footer>
+  <footer>נוצר באהבה עבור יוצרי תוכן בעברית 💛</footer>
 </div>
 
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js" crossorigin="anonymous"></script>
 <script>
-  // sprockets decoration
-  const sprocketsEl = document.getElementById('sprockets');
-  for(let i=0;i<40;i++){ sprocketsEl.innerHTML += '<span></span>'; }
-
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
   const fname = document.getElementById('fname');
@@ -616,7 +639,13 @@
   updateSettingsSummary();
   let settingsAutoCollapsedOnce = false;
   if(apiKeyInput.value.trim() && proxyUrlInput.value.trim()){
+    // Collapse instantly on first paint (no transition) — animating a
+    // collapse before the expanded state has ever actually been painted
+    // leaves the grid-rows transition stuck at an intermediate height.
+    settingsBodyWrap.style.transition = 'none';
     setSettingsExpanded(false);
+    void settingsBodyWrap.offsetHeight;
+    settingsBodyWrap.style.transition = '';
     settingsAutoCollapsedOnce = true;
   }
 
