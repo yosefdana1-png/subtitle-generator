@@ -224,6 +224,41 @@
   }
   .compress-done.show{ display:block; }
 
+  .style-row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 12px; margin-bottom: 14px;
+  }
+  .style-row:last-of-type{ margin-bottom: 0; }
+  .style-row .label{ margin-bottom:0; flex-shrink:0; }
+  input[type=range]{
+    flex:1; accent-color: var(--amber); height: 4px;
+  }
+  input[type=color]{
+    width: 40px; height: 32px; border-radius: 6px; border: 1px solid var(--edge);
+    background: var(--panel-2); padding: 2px; flex-shrink:0;
+  }
+  .pos-picker{ display:flex; gap:8px; flex:1; }
+  .pos-picker button{
+    flex:1; width:auto; padding: 8px 6px;
+    background: var(--panel-2); border: 1px solid var(--edge);
+    color: var(--text-dim); font-size: 12.5px;
+  }
+  .pos-picker button.active{
+    border-color: var(--amber); color: var(--amber);
+    background: rgba(201,138,62,0.08);
+  }
+  .style-value{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; color: var(--text-dim);
+    min-width: 34px; text-align:left; flex-shrink:0;
+  }
+  .seg .txt[contenteditable="true"]{
+    outline: none; border-bottom: 1px dashed transparent;
+  }
+  .seg .txt[contenteditable="true"]:focus{
+    border-bottom-color: var(--amber-dim);
+  }
+
   .timecode-strip{
     display:none;
     margin-top: 14px;
@@ -325,6 +360,44 @@
     <button class="btn-secondary" id="downloadBtn" style="display:none">הורדת קובץ SRT</button>
   </section>
 
+  <section id="styleSection" style="display:none">
+    <span class="label">סגנון כתוביות</span>
+
+    <div class="style-row">
+      <span class="label" style="margin:0">גודל טקסט</span>
+      <input type="range" id="styleFontSize" min="14" max="40" value="22">
+      <span class="style-value" id="styleFontSizeVal">22px</span>
+    </div>
+
+    <div class="style-row">
+      <span class="label" style="margin:0">צבע טקסט</span>
+      <input type="color" id="styleColor" value="#ffffff">
+      <span class="label" style="margin:0">רקע</span>
+      <input type="color" id="styleBgColor" value="#000000">
+    </div>
+
+    <div class="style-row">
+      <span class="label" style="margin:0">שקיפות רקע</span>
+      <input type="range" id="styleBgOpacity" min="0" max="100" value="78">
+      <span class="style-value" id="styleBgOpacityVal">78%</span>
+    </div>
+
+    <div class="style-row">
+      <span class="label" style="margin:0">מיקום</span>
+      <div class="pos-picker" id="posPicker">
+        <button data-pos="bottom" class="active">למטה</button>
+        <button data-pos="top">למעלה</button>
+      </div>
+    </div>
+
+    <button class="btn-secondary" id="autoStyleBtn">זיהוי סגנון אוטומטי מהסרטון</button>
+    <p class="hint">בודק את הבהירות של הסרטון ובוחר צבע טקסט ורקע עם ניגודיות טובה באופן אוטומטי.</p>
+
+    <button class="btn-primary" id="exportBtn" style="margin-top:14px">ייצוא סרטון עם כתוביות צרובות</button>
+    <div class="progress-track" id="exportProgressTrack"><div class="progress-fill" id="exportProgressFill"></div></div>
+    <p class="hint">שורף את הכתוביות לתוך הווידאו עצמו ליצירת קובץ mp4 חדש להורדה. תהליך כבד — יכול לקחת כמה דקות, במיוחד במובייל.</p>
+  </section>
+
   <footer>STUDIO · TIMECODE 00:00:00:00</footer>
 </div>
 
@@ -354,6 +427,20 @@
   const progressTrack = document.getElementById('progressTrack');
   const progressFill = document.getElementById('progressFill');
   const compressDone = document.getElementById('compressDone');
+  const styleSection = document.getElementById('styleSection');
+  const styleFontSize = document.getElementById('styleFontSize');
+  const styleFontSizeVal = document.getElementById('styleFontSizeVal');
+  const styleColor = document.getElementById('styleColor');
+  const styleBgColor = document.getElementById('styleBgColor');
+  const styleBgOpacity = document.getElementById('styleBgOpacity');
+  const styleBgOpacityVal = document.getElementById('styleBgOpacityVal');
+  const posPicker = document.getElementById('posPicker');
+  const autoStyleBtn = document.getElementById('autoStyleBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const exportProgressTrack = document.getElementById('exportProgressTrack');
+  const exportProgressFill = document.getElementById('exportProgressFill');
+
+  let captionStyle = { fontSize: 22, color: '#ffffff', bgColor: '#000000', bgOpacity: 0.78, position: 'bottom' };
 
   let currentFile = null;
   let segments = [];
@@ -428,7 +515,82 @@
     return `${m}:${s}`;
   }
 
-  compressBtn.addEventListener('click', async () => {
+  function applyStyleToOverlay(){
+    const overlay = document.querySelector('.caption-overlay');
+    captionText.style.fontSize = captionStyle.fontSize + 'px';
+    captionText.style.color = captionStyle.color;
+    captionText.style.background = hexToRgba(captionStyle.bgColor, captionStyle.bgOpacity);
+    overlay.style.bottom = captionStyle.position === 'top' ? 'auto' : '6%';
+    overlay.style.top = captionStyle.position === 'top' ? '6%' : 'auto';
+  }
+
+  function hexToRgba(hex, opacity){
+    hex = hex.replace('#','');
+    const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
+    return `rgba(${r},${g},${b},${opacity})`;
+  }
+
+  function toAssColor(hex, opacity){
+    hex = hex.replace('#','');
+    const r = hex.substring(0,2), g = hex.substring(2,4), b = hex.substring(4,6);
+    const alpha = Math.round((1 - (opacity===undefined?1:opacity)) * 255).toString(16).padStart(2,'0');
+    return ('&H' + alpha + b + g + r).toUpperCase();
+  }
+
+  styleFontSize.addEventListener('input', () => {
+    captionStyle.fontSize = parseInt(styleFontSize.value, 10);
+    styleFontSizeVal.textContent = captionStyle.fontSize + 'px';
+    applyStyleToOverlay();
+  });
+  styleColor.addEventListener('input', () => { captionStyle.color = styleColor.value; applyStyleToOverlay(); });
+  styleBgColor.addEventListener('input', () => { captionStyle.bgColor = styleBgColor.value; applyStyleToOverlay(); });
+  styleBgOpacity.addEventListener('input', () => {
+    captionStyle.bgOpacity = parseInt(styleBgOpacity.value, 10) / 100;
+    styleBgOpacityVal.textContent = styleBgOpacity.value + '%';
+    applyStyleToOverlay();
+  });
+  posPicker.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-pos]');
+    if(!btn) return;
+    captionStyle.position = btn.dataset.pos;
+    [...posPicker.children].forEach(b => b.classList.toggle('active', b === btn));
+    applyStyleToOverlay();
+  });
+
+  autoStyleBtn.addEventListener('click', () => {
+    try{
+      const canvas = document.createElement('canvas');
+      canvas.width = 80; canvas.height = 45;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let total = 0;
+      for(let i=0; i<data.length; i+=4){
+        total += 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+      }
+      const avgBrightness = total / (data.length/4); // 0-255
+
+      if(avgBrightness > 140){
+        // Bright video → dark text on light translucent background
+        captionStyle.color = '#111111';
+        captionStyle.bgColor = '#ffffff';
+        captionStyle.bgOpacity = 0.75;
+      } else {
+        // Dark video → light text on dark translucent background
+        captionStyle.color = '#ffffff';
+        captionStyle.bgColor = '#000000';
+        captionStyle.bgOpacity = 0.75;
+      }
+      styleColor.value = captionStyle.color;
+      styleBgColor.value = captionStyle.bgColor;
+      styleBgOpacity.value = Math.round(captionStyle.bgOpacity*100);
+      styleBgOpacityVal.textContent = Math.round(captionStyle.bgOpacity*100) + '%';
+      applyStyleToOverlay();
+      showStatus(`זוהה סגנון אוטומטית (בהירות ממוצעת: ${Math.round(avgBrightness)}/255).`, 'ok');
+    }catch(e){
+      showStatus('זיהוי אוטומטי נכשל — ודא שהסרטון מתנגן (לחץ פליי לרגע) ונסה שוב.', 'err');
+    }
+  });
     if(!currentFile){ return; }
     if(typeof SharedArrayBuffer === 'undefined'){
       showStatus('הדחיסה לא זמינה באירוח הנוכחי (GitHub Pages) — חסרה תמיכת דפדפן שדורשת הגדרות שרת מיוחדות. אפשר לדלג על דחיסה ולנסות ישירות "יצירת כתוביות", או לעבור לאירוח אחר בהמשך.', 'err');
@@ -599,6 +761,8 @@
       renderSegments();
       showStatus(`הכתוביות מוכנות — ${segments.length} קטעים.`, 'ok');
       downloadBtn.style.display = 'block';
+      styleSection.style.display = 'block';
+      applyStyleToOverlay();
     }catch(err){
       let msg = err.message || 'שגיאה לא צפויה.';
       showStatus('התמלול נכשל: ' + msg, 'err');
@@ -609,11 +773,21 @@
 
   function renderSegments(){
     segList.innerHTML = '';
-    segments.forEach(seg => {
+    segments.forEach((seg, i) => {
       const row = document.createElement('div');
       row.className = 'seg';
-      row.innerHTML = `<span class="tc">${fmtShort(seg.start)}</span><span class="txt">${seg.text}</span>`;
-      row.addEventListener('click', () => { video.currentTime = seg.start; video.play(); });
+      const tc = document.createElement('span');
+      tc.className = 'tc';
+      tc.textContent = fmtShort(seg.start);
+      tc.addEventListener('click', () => { video.currentTime = seg.start; video.play(); });
+      const txt = document.createElement('span');
+      txt.className = 'txt';
+      txt.textContent = seg.text;
+      txt.contentEditable = 'true';
+      txt.addEventListener('blur', () => { segments[i].text = txt.textContent.trim(); });
+      txt.addEventListener('click', e => e.stopPropagation());
+      row.appendChild(tc);
+      row.appendChild(txt);
       segList.appendChild(row);
     });
     segList.classList.add('show');
@@ -625,18 +799,89 @@
     captionText.textContent = seg ? seg.text : '';
   });
 
-  downloadBtn.addEventListener('click', () => {
+  function buildSrt(){
     let srt = '';
     segments.forEach((seg, i) => {
       srt += `${i+1}\n${fmtTime(seg.start)} --> ${fmtTime(seg.end)}\n${seg.text}\n\n`;
     });
-    const blob = new Blob([srt], { type: 'text/plain;charset=utf-8' });
+    return srt;
+  }
+
+  downloadBtn.addEventListener('click', () => {
+    const blob = new Blob([buildSrt()], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = (currentFile.name.replace(/\.[^.]+$/, '') || 'captions') + '.srt';
     a.click();
     URL.revokeObjectURL(url);
+  });
+
+  let hebrewFontLoaded = false;
+  async function ensureHebrewFont(ff){
+    if(hebrewFontLoaded) return;
+    const fontData = await FFmpeg.fetchFile('https://raw.githubusercontent.com/openmaptiles/fonts/master/noto-sans/NotoSansHebrew-Regular.ttf');
+    try{ ff.FS('mkdir', 'fonts'); }catch(e){}
+    ff.FS('writeFile', 'fonts/NotoSansHebrew-Regular.ttf', fontData);
+    hebrewFontLoaded = true;
+  }
+
+  exportBtn.addEventListener('click', async () => {
+    if(!currentFile || segments.length === 0) return;
+    if(typeof SharedArrayBuffer === 'undefined'){
+      showStatus('ייצוא עם כתוביות צרובות דורש את אותה תמיכת דפדפן שהדחיסה דורשת (עובד ב-Cloudflare Pages).', 'err');
+      return;
+    }
+    exportBtn.disabled = true;
+    exportProgressTrack.classList.add('show');
+    exportProgressFill.style.width = '2%';
+
+    try{
+      showStatus('טוען מנוע ועיבוד (כולל פונט עברית, פעם ראשונה יכול לקחת רגע)...');
+      const ff = await ensureFfmpegLoaded();
+      ff.setProgress && ff.setProgress(({ ratio }) => {
+        if(ratio >= 0 && ratio <= 1) exportProgressFill.style.width = (ratio*100).toFixed(0) + '%';
+      });
+      await ensureHebrewFont(ff);
+
+      const inName = 'burn_in_' + Date.now() + '.mp4';
+      const outName = 'burn_out_' + Date.now() + '.mp4';
+      ff.FS('writeFile', inName, await FFmpeg.fetchFile(currentFile));
+      ff.FS('writeFile', 'subs.srt', buildSrt());
+
+      const primary = toAssColor(captionStyle.color, 1);
+      const back = toAssColor(captionStyle.bgColor, captionStyle.bgOpacity);
+      const alignment = captionStyle.position === 'top' ? 8 : 2;
+      const forceStyle = `FontName=Noto Sans Hebrew,FontSize=${captionStyle.fontSize},PrimaryColour=${primary},BackColour=${back},BorderStyle=3,Outline=0,Shadow=0,MarginV=40,Alignment=${alignment}`;
+
+      showStatus('שורף את הכתוביות לתוך הווידאו...');
+      await ff.run(
+        '-i', inName,
+        '-vf', `subtitles=subs.srt:fontsdir=fonts:force_style='${forceStyle}'`,
+        '-c:a', 'copy',
+        outName
+      );
+
+      const data = ff.FS('readFile', outName);
+      ff.FS('unlink', inName);
+      ff.FS('unlink', outName);
+      ff.FS('unlink', 'subs.srt');
+
+      const blob = new Blob([data.buffer], { type: 'video/mp4' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (currentFile.name.replace(/\.[^.]+$/, '') || 'video') + '_כתוביות.mp4';
+      a.click();
+      URL.revokeObjectURL(url);
+
+      exportProgressFill.style.width = '100%';
+      showStatus('הווידאו עם הכתוביות הצרובות הורד בהצלחה.', 'ok');
+    }catch(err){
+      showStatus('הייצוא נכשל: ' + (err.message || 'שגיאה לא צפויה. אם הכתוביות מוצגות כריבועים ריקים, ייתכן שהפונט לא נטען כראוי — נסה שוב.'), 'err');
+    }finally{
+      exportBtn.disabled = false;
+    }
   });
 </script>
 </body>
