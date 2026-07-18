@@ -281,6 +281,12 @@
   </section>
 
   <section>
+    <span class="label">הקשר לתמלול (אופציונלי)</span>
+    <input type="text" id="promptText" placeholder="לדוגמה: שיעור בחסידות, אהבת תמים, שמות של אנשים..." autocomplete="off">
+    <p class="hint">מונחים, שמות או ז'רגון שחוזרים בסרטון — עוזר ל-Whisper לזהות אותם נכון במקום לנחש מילה דומה. לא חובה.</p>
+  </section>
+
+  <section>
     <span class="label">סרטון</span>
     <div class="dropzone" id="dropzone">
       <div class="icon">🎬</div>
@@ -308,7 +314,7 @@
   </section>
 
   <div class="video-stage" id="videoStage" style="display:none">
-    <video id="video" controls></video>
+    <video id="video" controls playsinline webkit-playsinline></video>
     <div class="caption-overlay"><span id="captionText"></span></div>
   </div>
 
@@ -566,6 +572,8 @@
       formData.append('model', 'whisper-1');
       formData.append('language', 'he');
       formData.append('response_format', 'verbose_json');
+      const promptText = document.getElementById('promptText').value.trim();
+      if(promptText){ formData.append('prompt', promptText); }
 
       const res = await fetch(proxyUrl, {
         method: 'POST',
