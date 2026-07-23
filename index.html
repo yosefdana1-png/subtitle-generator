@@ -215,8 +215,8 @@
     transform: scale(1.01);
   }
   .dropzone:active{ transform: scale(.995); }
-  .dropzone .icon{ font-size: 26px; margin-bottom: 8px; }
-  .dropzone .main{ font-size: 14px; }
+  .dropzone .icon{ font-size: 36px; margin-bottom: 10px; }
+  .dropzone .main{ font-size: 14.5px; font-weight: 500; }
   .dropzone .fname{
     font-family: 'IBM Plex Mono', monospace;
     color: var(--amber);
@@ -227,32 +227,42 @@
   input[type=file]{ display:none; }
 
   video{
-    width: 100%; display:block; border-radius: 14px;
+    width: 100%; display:block; border-radius: 16px;
     background:#000;
   }
-  .video-stage{ position: relative; margin-bottom: 12px; }
+  .video-stage{
+    position: relative; margin-bottom: 16px; border-radius: 16px;
+    box-shadow: 0 12px 34px rgba(0,0,0,0.4);
+  }
   .caption-overlay{
     position:absolute; bottom: 6%; left: 5%; right:5%;
     text-align:center;
     pointer-events:none;
   }
   .caption-overlay > span{
-    background: rgba(10,10,6,0.78);
     color:#fff;
-    padding: 6px 14px;
-    border-radius: 5px;
-    font-size: clamp(14px, 3.2vw, 19px);
-    font-weight: 500;
+    font-size: clamp(15px, 3.4vw, 20px);
+    font-weight: 600;
     display:inline-block;
-    line-height:1.5;
+    line-height:1.34;
+    letter-spacing:-0.01em;
+    max-width: 96%;
+    /* paint the outline BEHIND the fill so a thick text-stroke reads as a
+       clean outline (the TikTok/Hormozi look) instead of eating the letters.
+       Inherited, so the per-word child spans get it too. */
+    paint-order: stroke fill;
   }
+  /* Default emphasis look = the app accent pill (used in the editable
+     segment list so it always reads on the dark panel). In the video
+     overlay the emphasis is repainted inline to match the chosen caption
+     preset. */
   .emph-word{
-    font-weight: 800;
-    font-size: 1.22em;
+    font-weight: 900;
+    font-size: 1.14em;
     background: var(--accent-grad);
     color: #2a1220;
-    padding: 1px 8px;
-    border-radius: 6px;
+    padding: 0 7px;
+    border-radius: 7px;
     display: inline-block;
     margin: 0 1px;
   }
@@ -343,23 +353,38 @@
   .compress-done.show{ display:block; }
 
   .preset-picker{
-    display:flex; gap:10px; overflow-x:auto; padding: 2px 2px 14px;
-    margin-top: -2px;
+    display:flex; gap:10px; overflow-x:auto;
+    padding: 4px 2px 14px; margin-top: 2px;
+    scrollbar-width: thin; scrollbar-color: var(--edge) transparent;
   }
+  .preset-picker::-webkit-scrollbar{ height:6px; }
+  .preset-picker::-webkit-scrollbar-thumb{ background: var(--edge); border-radius:999px; }
   .preset-chip{
-    flex-shrink:0; width:auto; display:flex; flex-direction:column;
-    align-items:center; gap:6px; padding: 10px 14px;
-    background: var(--panel-2); border: 1.5px solid var(--edge);
-    border-radius: 14px; cursor:pointer;
+    flex-shrink:0; width:auto; cursor:pointer;
+    display:flex; flex-direction:column; align-items:stretch; gap:8px;
+    padding: 6px; border-radius: 16px;
+    background: var(--panel-2); border: 2px solid var(--edge);
+    transition: border-color .15s, transform .15s var(--ease-bounce), box-shadow .15s;
   }
-  .preset-chip:hover{ border-color: var(--amber-dim); }
-  .preset-chip.active{ border-color: var(--amber); background: rgba(255,138,101,0.08); }
-  .preset-chip .swatch{
-    font-size: 15px; line-height:1; padding: 4px 10px; border-radius: 6px;
-    white-space:nowrap;
+  .preset-chip:hover{ border-color: var(--amber-dim); transform: translateY(-2px); }
+  .preset-chip.active{ border-color: var(--amber); box-shadow: 0 0 0 3px var(--amber-glow); }
+  .preset-preview{
+    width: 116px; height: 62px; border-radius: 11px;
+    display:flex; align-items:center; justify-content:center; padding: 5px;
+    overflow:hidden;
+    background:
+      linear-gradient(135deg, #4a4466, #262233),
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 7px, transparent 7px 14px);
+  }
+  .preset-preview .cap{
+    font-family:'Rubik',sans-serif; font-size: 12.5px; line-height:1.15;
+    text-align:center; white-space:nowrap;
+    display:inline-flex; gap:4px; align-items:center;
+    paint-order: stroke fill;
   }
   .preset-chip .plabel{
-    font-size: 10.5px; color: var(--text-dim); white-space:nowrap;
+    font-size: 11px; font-weight:600; color: var(--text-dim);
+    text-align:center; white-space:nowrap;
   }
   .preset-chip.active .plabel{ color: var(--amber); }
 
@@ -370,7 +395,22 @@
   .style-row:last-of-type{ margin-bottom: 0; }
   .style-row .label{ margin-bottom:0; flex-shrink:0; }
   input[type=range]{
-    flex:1; accent-color: var(--amber); height: 4px;
+    -webkit-appearance:none; appearance:none;
+    flex:1; height: 6px; border-radius: 999px;
+    background: var(--panel-2); border: 1px solid var(--edge);
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:18px; height:18px; border-radius:50%;
+    background: var(--accent-grad);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35), 0 0 0 3px rgba(255,138,101,0.15);
+    cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:18px; height:18px; border:none; border-radius:50%;
+    background: #ff7a86; box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    cursor:pointer;
   }
   input[type=color]{
     width: 40px; height: 32px; border-radius: 10px; border: 1px solid var(--edge);
@@ -692,21 +732,89 @@
   });
 
   let captionStyle = {
-    fontSize: 22, color: '#ffffff', bgColor: '#000000', bgOpacity: 0.78,
-    position: 'bottom', weight: 500, boxed: true, strokeColor: null
+    fontSize: 22, color: '#ffffff', bgColor: '#000000', bgOpacity: 0.72,
+    position: 'bottom', weight: 600, boxed: true,
+    stroke: 0, strokeColor: null, glow: null,
+    emphColor: '#ffd84d', emphBg: null, emphGrad: false
   };
 
+  // Caption look presets. Each carries a base look (color / box / outline /
+  // glow / weight) plus how an emphasized word should pop within that look —
+  // a color swap (emphColor), a highlight pill (emphBg), or the app's
+  // coral→pink gradient text (emphGrad). Tuned to feel like the caption
+  // styles common on TikTok / Reels.
   const CAPTION_PRESETS = [
-    { id:'classic', label:'קלאסי',    color:'#ffffff', bgColor:'#000000', bgOpacity:0.78, boxed:true,  strokeColor:null,      weight:500 },
-    { id:'tiktok',  label:'טיקטוק',   color:'#ffffff', bgColor:'#000000', bgOpacity:0,    boxed:false, strokeColor:'#000000', weight:800 },
-    { id:'neon',    label:'ניאון',    color:'#f9ff3d', bgColor:'#000000', bgOpacity:0,    boxed:false, strokeColor:'#000000', weight:800 },
-    { id:'glow',    label:'זוהר ורוד', color:'#ffffff', bgColor:'#ff3d8a', bgOpacity:0,    boxed:false, strokeColor:'#ff3d8a', weight:800 },
-    { id:'mint',    label:'מינטי',    color:'#0f2c22', bgColor:'#5fe0b0', bgOpacity:0.92, boxed:true,  strokeColor:null,      weight:700 },
+    { id:'classic', label:'קלאסי',  weight:600, color:'#ffffff',
+      boxed:true,  bgColor:'#000000', bgOpacity:0.72, stroke:0,   strokeColor:null,      glow:null,
+      emphColor:'#ffd84d', emphBg:null,      emphGrad:false },
+
+    { id:'bold',    label:'בולד',   weight:900, color:'#ffffff',
+      boxed:false, bgColor:'#000000', bgOpacity:0,    stroke:2.6, strokeColor:'#000000', glow:null,
+      emphColor:'#3df08f', emphBg:null,      emphGrad:false },
+
+    { id:'pop',     label:'פופ',    weight:900, color:'#141000',
+      boxed:true,  bgColor:'#ffd400', bgOpacity:1,    stroke:0,   strokeColor:null,      glow:null,
+      emphColor:'#ffffff', emphBg:'#ff2e7e', emphGrad:false },
+
+    { id:'neon',    label:'ניאון',  weight:800, color:'#ecfffb',
+      boxed:false, bgColor:'#000000', bgOpacity:0,    stroke:1.4, strokeColor:'#04352a', glow:'#00f5c8',
+      emphColor:'#00f5c8', emphBg:null,      emphGrad:false },
+
+    { id:'sunset',  label:'סאנסט',  weight:900, color:'#ffffff',
+      boxed:false, bgColor:'#000000', bgOpacity:0,    stroke:2.4, strokeColor:'#3a0f2e', glow:null,
+      emphColor:'#ff7aa8', emphBg:null,      emphGrad:true },
+
+    { id:'mint',    label:'מינטי',  weight:800, color:'#0d2b21',
+      boxed:true,  bgColor:'#63e6b8', bgOpacity:0.96, stroke:0,   strokeColor:null,      glow:null,
+      emphColor:'#0d2b21', emphBg:'#ffffff', emphGrad:false },
   ];
 
+  const ACCENT_GRAD = 'linear-gradient(135deg,#ff9966,#ff5f9e)';
   const presetPicker = document.getElementById('presetPicker');
   const bgOpacityRow = document.getElementById('bgOpacityRow');
   let activePresetId = 'classic';
+
+  // Applies the whole-line box (bg / padding) for a boxed preset, or clears
+  // it for an outline/glow preset. Used for both the live overlay and the
+  // little preview inside each preset chip.
+  function styleCaptionLine(el, cs){
+    if(cs.boxed){
+      el.style.background = hexToRgba(cs.bgColor, cs.bgOpacity);
+      el.style.padding = '5px 14px';
+      el.style.borderRadius = '11px';
+    } else {
+      el.style.background = 'transparent';
+      el.style.padding = '0';
+      el.style.borderRadius = '0';
+    }
+  }
+
+  // Paints a single emphasized word span to match the active preset.
+  function paintEmphWord(span, cs){
+    span.style.fontWeight = 900;
+    span.style.borderRadius = '8px';
+    span.style.webkitTextStroke = '';
+    span.style.textShadow = cs.glow ? `0 0 8px ${cs.glow}` : '';
+    if(cs.emphGrad){
+      span.style.background = ACCENT_GRAD;
+      span.style.webkitBackgroundClip = 'text';
+      span.style.backgroundClip = 'text';
+      span.style.color = 'transparent';
+      span.style.padding = '0 2px';
+    } else if(cs.emphBg){
+      span.style.background = cs.emphBg;
+      span.style.webkitBackgroundClip = 'border-box';
+      span.style.backgroundClip = 'border-box';
+      span.style.color = cs.emphColor;
+      span.style.padding = '0 8px';
+    } else {
+      span.style.background = 'transparent';
+      span.style.webkitBackgroundClip = 'border-box';
+      span.style.backgroundClip = 'border-box';
+      span.style.color = cs.emphColor;
+      span.style.padding = '0 2px';
+    }
+  }
 
   function renderPresetPicker(){
     presetPicker.innerHTML = '';
@@ -714,20 +822,29 @@
       const chip = document.createElement('div');
       chip.className = 'preset-chip' + (p.id === activePresetId ? ' active' : '');
       chip.dataset.preset = p.id;
-      const swatch = document.createElement('span');
-      swatch.className = 'swatch';
-      swatch.textContent = 'Aa';
-      swatch.style.color = p.color;
-      swatch.style.fontWeight = p.weight;
-      swatch.style.background = p.boxed ? hexToRgba(p.bgColor, p.bgOpacity) : 'transparent';
-      if(p.strokeColor){
-        swatch.style.webkitTextStroke = '1px ' + p.strokeColor;
-        swatch.style.textShadow = `0 0 5px ${p.strokeColor}`;
-      }
+
+      const preview = document.createElement('div');
+      preview.className = 'preset-preview';
+      const cap = document.createElement('span');
+      cap.className = 'cap';
+      cap.style.color = p.color;
+      cap.style.fontWeight = p.weight;
+      if(p.stroke && p.strokeColor) cap.style.webkitTextStroke = (p.stroke*0.55) + 'px ' + p.strokeColor;
+      if(p.glow) cap.style.textShadow = `0 0 6px ${p.glow}`;
+      else if(!p.boxed) cap.style.textShadow = '0 1px 3px rgba(0,0,0,0.6)';
+      styleCaptionLine(cap, p);
+
+      const w1 = document.createElement('span'); w1.textContent = 'טקסט';
+      const w2 = document.createElement('span'); w2.textContent = 'חי'; w2.style.fontSize = '1.12em';
+      paintEmphWord(w2, p);
+      cap.appendChild(w1); cap.appendChild(w2);
+      preview.appendChild(cap);
+
       const label = document.createElement('span');
       label.className = 'plabel';
       label.textContent = p.label;
-      chip.appendChild(swatch);
+
+      chip.appendChild(preview);
       chip.appendChild(label);
       chip.addEventListener('click', () => applyPreset(p.id));
       presetPicker.appendChild(chip);
@@ -742,8 +859,13 @@
     captionStyle.bgColor = p.bgColor;
     captionStyle.bgOpacity = p.bgOpacity;
     captionStyle.boxed = p.boxed;
+    captionStyle.stroke = p.stroke;
     captionStyle.strokeColor = p.strokeColor;
+    captionStyle.glow = p.glow;
     captionStyle.weight = p.weight;
+    captionStyle.emphColor = p.emphColor;
+    captionStyle.emphBg = p.emphBg;
+    captionStyle.emphGrad = p.emphGrad;
     styleColor.value = p.color;
     styleBgColor.value = p.bgColor;
     styleBgOpacity.value = Math.round(p.bgOpacity * 100);
@@ -923,27 +1045,30 @@
 
   function applyStyleToOverlay(){
     const overlay = document.querySelector('.caption-overlay');
-    captionText.style.fontSize = captionStyle.fontSize + 'px';
-    captionText.style.fontWeight = captionStyle.weight;
-    captionText.style.color = captionStyle.color;
-    if(captionStyle.boxed){
-      captionText.style.background = hexToRgba(captionStyle.bgColor, captionStyle.bgOpacity);
-      captionText.style.padding = '6px 14px';
-      captionText.style.borderRadius = '5px';
-    } else {
-      captionText.style.background = 'transparent';
-      captionText.style.padding = '0';
-      captionText.style.borderRadius = '0';
-    }
-    if(captionStyle.strokeColor){
-      captionText.style.webkitTextStroke = '1.5px ' + captionStyle.strokeColor;
-      captionText.style.textShadow = `0 0 6px ${captionStyle.strokeColor}, 0 2px 4px rgba(0,0,0,0.5)`;
+    const cs = captionStyle;
+    captionText.style.fontSize = cs.fontSize + 'px';
+    captionText.style.fontWeight = cs.weight;
+    captionText.style.color = cs.color;
+    styleCaptionLine(captionText, cs);
+
+    const shadow = [];
+    if(cs.stroke && cs.strokeColor){
+      captionText.style.webkitTextStroke = cs.stroke + 'px ' + cs.strokeColor;
     } else {
       captionText.style.webkitTextStroke = '';
-      captionText.style.textShadow = captionStyle.boxed ? '' : '0 2px 6px rgba(0,0,0,0.6)';
     }
-    overlay.style.bottom = captionStyle.position === 'top' ? 'auto' : '6%';
-    overlay.style.top = captionStyle.position === 'top' ? '6%' : 'auto';
+    if(cs.glow){ shadow.push(`0 0 9px ${cs.glow}`, `0 0 20px ${cs.glow}`); }
+    if(!cs.boxed && !cs.glow){ shadow.push('0 2px 6px rgba(0,0,0,0.6)'); }
+    captionText.style.textShadow = shadow.join(', ');
+
+    overlay.style.bottom = cs.position === 'top' ? 'auto' : '6%';
+    overlay.style.top = cs.position === 'top' ? '6%' : 'auto';
+
+    // Repaint the currently-shown caption so a style change is visible even
+    // while the video is paused.
+    const t = video.currentTime;
+    const seg = segments.find(s => t >= s.start && t <= s.end);
+    if(seg) renderWordsInto(captionText, seg, true);
   }
 
   function hexToRgba(hex, opacity){
@@ -1009,7 +1134,9 @@
         captionStyle.bgOpacity = 0.75;
       }
       captionStyle.boxed = true;
+      captionStyle.stroke = 0;
       captionStyle.strokeColor = null;
+      captionStyle.glow = null;
       styleColor.value = captionStyle.color;
       styleBgColor.value = captionStyle.bgColor;
       styleBgOpacity.value = Math.round(captionStyle.bgOpacity*100);
@@ -1243,8 +1370,11 @@
 
   // Renders a segment's text into `el`, splitting into per-word spans
   // (highlighting emphasized ones) when word-level data is available,
-  // otherwise falling back to plain text.
-  function renderWordsInto(el, seg){
+  // otherwise falling back to plain text. When `forOverlay` is set the
+  // emphasized words are painted to match the active caption preset;
+  // otherwise they use the default app-accent pill (readable in the
+  // editable segment list).
+  function renderWordsInto(el, seg, forOverlay){
     el.innerHTML = '';
     if(!seg || !seg.words || !seg.words.length){
       el.textContent = seg ? seg.text : '';
@@ -1254,7 +1384,10 @@
       if(i > 0) el.appendChild(document.createTextNode(' '));
       const span = document.createElement('span');
       span.textContent = w.word;
-      if(w.emphasis) span.className = 'emph-word';
+      if(w.emphasis){
+        span.className = 'emph-word';
+        if(forOverlay) paintEmphWord(span, captionStyle);
+      }
       el.appendChild(span);
     });
   }
@@ -1262,15 +1395,19 @@
   video.addEventListener('timeupdate', () => {
     const t = video.currentTime;
     const seg = segments.find(s => t >= s.start && t <= s.end);
-    renderWordsInto(captionText, seg);
+    renderWordsInto(captionText, seg, true);
   });
 
   function buildSrt(includeEmphasis){
+    // The emphasized-word color for the burned video. Gradient text can't be
+    // expressed in SRT markup, so the gradient preset falls back to a
+    // representative pink.
+    const emphHex = captionStyle.emphGrad ? '#ff5f9e' : (captionStyle.emphColor || '#ffd84d');
     let srt = '';
     segments.forEach((seg, i) => {
       let text = seg.text;
       if(includeEmphasis && seg.words && seg.words.length){
-        text = seg.words.map(w => w.emphasis ? `<b><font color="#ffcc33">${w.word}</font></b>` : w.word).join(' ');
+        text = seg.words.map(w => w.emphasis ? `<b><font color="${emphHex}">${w.word}</font></b>` : w.word).join(' ');
       }
       srt += `${i+1}\n${fmtTime(seg.start)} --> ${fmtTime(seg.end)}\n${text}\n\n`;
     });
@@ -1337,7 +1474,11 @@
         forceStyle = `FontName=Noto Sans Hebrew,Bold=${bold},FontSize=${captionStyle.fontSize},PrimaryColour=${primary},BackColour=${back},BorderStyle=3,Outline=6,Shadow=0,MarginV=${marginV},Alignment=${alignment}`;
       } else {
         const outlineColor = toAssColor(captionStyle.strokeColor || '#000000', 1);
-        forceStyle = `FontName=Noto Sans Hebrew,Bold=${bold},FontSize=${captionStyle.fontSize},PrimaryColour=${primary},OutlineColour=${outlineColor},BorderStyle=1,Outline=2.5,Shadow=1,MarginV=${marginV},Alignment=${alignment}`;
+        // Map the preview's CSS stroke width (~1.4–2.6px against a phone-width
+        // preview) up to a chunkier ASS outline so the burned result reads as
+        // boldly as the preview.
+        const outlineW = Math.max(2, Math.round((captionStyle.stroke || 2) * 1.6));
+        forceStyle = `FontName=Noto Sans Hebrew,Bold=${bold},FontSize=${captionStyle.fontSize},PrimaryColour=${primary},OutlineColour=${outlineColor},BorderStyle=1,Outline=${outlineW},Shadow=1,MarginV=${marginV},Alignment=${alignment}`;
       }
 
       showStatus('שורף את הכתוביות לתוך הווידאו...');
