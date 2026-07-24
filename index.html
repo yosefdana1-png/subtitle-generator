@@ -8,19 +8,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
   :root{
-    --bg: #140a26;
-    --panel: rgba(38, 26, 60, 0.55);
-    --panel-solid: #241834;
-    --panel-2: rgba(255,255,255,0.07);
-    --edge: rgba(255,255,255,0.13);
-    --edge-soft: rgba(255,255,255,0.07);
-    --amber: #ff77a9;
-    --amber-dim: #b98cff;
-    --amber-glow: rgba(185,140,255,0.35);
-    --accent-grad: linear-gradient(135deg, #ffb057 0%, #ff5f9e 52%, #a06bff 100%);
-    --text: #f7f3ff;
-    --text-dim: #b6acd6;
-    --green: #4fe0a8;
+    --bg: #0b0f16;
+    --panel: rgba(20, 27, 40, 0.66);
+    --panel-solid: #141b28;
+    --panel-2: rgba(255,255,255,0.06);
+    --edge: rgba(255,255,255,0.11);
+    --edge-soft: rgba(255,255,255,0.06);
+    --accent: #ff4d8d;
+    --accent-2: #23e0c2;
+    --amber: #ff6f97;          /* primary accent (links / active text) */
+    --amber-dim: #23e0c2;      /* electric-teal secondary (hovers / focus) */
+    --amber-glow: rgba(35,224,194,0.32);
+    --accent-grad: linear-gradient(135deg, #ff9a54 0%, #ff3d7f 55%, #ff4db2 100%);
+    --accent-grad-2: linear-gradient(135deg, #23e0c2 0%, #37b6ff 100%);
+    --text: #f2f6fb;
+    --text-dim: #9fb0c6;
+    --green: #33e0a6;
     --red: #ff6b8a;
     --radius: 22px;
     --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
@@ -35,16 +38,17 @@
     padding: 32px 16px 90px;
     position: relative;
   }
-  /* Colorful glow backdrop that the frosted cards float over. */
+  /* Colorful glow backdrop that the frosted cards float over — warm coral
+     and magenta meeting an electric teal for a fresh, energetic feel. */
   body::before{
     content:""; position:fixed; inset:-15%; z-index:-1; pointer-events:none;
     background:
-      radial-gradient(38% 40% at 14% 10%, rgba(255,95,158,0.42), transparent 62%),
-      radial-gradient(42% 42% at 88% 8%, rgba(160,107,255,0.40), transparent 62%),
-      radial-gradient(46% 46% at 82% 88%, rgba(255,160,80,0.32), transparent 62%),
-      radial-gradient(44% 46% at 8% 92%, rgba(90,130,255,0.34), transparent 62%),
-      linear-gradient(165deg, #1b0f33 0%, #221041 45%, #2a1038 100%);
-    filter: saturate(1.1);
+      radial-gradient(38% 40% at 12% 8%, rgba(255,61,127,0.40), transparent 62%),
+      radial-gradient(42% 44% at 90% 10%, rgba(35,224,194,0.34), transparent 62%),
+      radial-gradient(46% 46% at 86% 90%, rgba(255,154,84,0.30), transparent 62%),
+      radial-gradient(44% 46% at 6% 92%, rgba(55,140,255,0.30), transparent 62%),
+      linear-gradient(165deg, #0c1220 0%, #0d1526 48%, #0f1220 100%);
+    filter: saturate(1.15);
   }
   .wrap{ max-width: 760px; margin: 0 auto; }
 
@@ -109,15 +113,16 @@
   }
 
   section{
-    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 45%), var(--panel);
-    -webkit-backdrop-filter: blur(18px) saturate(150%);
-    backdrop-filter: blur(18px) saturate(150%);
+    position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012) 45%), var(--panel);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
     border: 1px solid var(--edge);
-    border-top-color: rgba(255,255,255,0.22);
+    border-top-color: rgba(255,255,255,0.2);
     border-radius: var(--radius);
-    padding: 22px;
+    padding: 24px 22px 22px;
     margin-bottom: 18px;
-    box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 14px 40px rgba(12,4,28,0.42);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.07) inset, 0 18px 48px rgba(4,10,20,0.5);
     transition: box-shadow .2s, transform .2s;
     animation: reveal .5s var(--ease-bounce) both;
   }
@@ -125,11 +130,12 @@
     from{ opacity:0; transform: translateY(14px); }
     to{ opacity:1; transform: none; }
   }
-  .step{ position:relative; overflow:hidden; }
+  .step{ overflow:hidden; }
+  /* full-width gradient strip along the top edge of each step card */
   .step::before{
-    content:""; position:absolute; top:0; bottom:0; right:0; width:4px;
+    content:""; position:absolute; top:0; left:0; right:0; height:3px;
     background: var(--accent-grad);
-    opacity: .7;
+    opacity: .9;
   }
   .step-head{
     display:flex; align-items:center; gap:10px; width:100%;
@@ -141,12 +147,12 @@
     display:flex; align-items:center; gap:10px; margin-bottom:18px;
   }
   .step-badge{
-    font-family: 'Rubik', sans-serif; font-weight: 700;
-    font-size: 12px; color: #2a1220; flex-shrink:0;
+    font-family: 'Rubik', sans-serif; font-weight: 800;
+    font-size: 12.5px; color: #24110f; flex-shrink:0;
     border-radius: 999px;
     background: var(--accent-grad);
-    box-shadow: 0 3px 10px rgba(255,95,158,0.28);
-    width: 28px; height: 28px;
+    box-shadow: 0 4px 14px rgba(255,61,127,0.4), 0 0 0 4px rgba(255,61,127,0.12);
+    width: 30px; height: 30px;
     display:flex; align-items:center; justify-content:center;
   }
   .step-title{ font-size: 15px; font-weight: 700; flex-shrink:0; }
@@ -425,7 +431,7 @@
     -webkit-appearance:none; appearance:none;
     width:18px; height:18px; border-radius:50%;
     background: var(--accent-grad);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.35), 0 0 0 3px rgba(185,140,255,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35), 0 0 0 3px rgba(35,224,194,0.25);
     cursor:pointer;
   }
   input[type=range]::-moz-range-thumb{
