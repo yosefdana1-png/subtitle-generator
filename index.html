@@ -8,68 +8,82 @@
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
   :root{
-    --bg: #17151f;
-    --panel: #211f2c;
-    --panel-2: #2b2839;
-    --edge: rgba(255,255,255,0.09);
-    --edge-soft: rgba(255,255,255,0.05);
-    --amber: #ff8a65;
-    --amber-dim: #d16c8f;
-    --amber-glow: rgba(255,138,101,0.3);
-    --accent-grad: linear-gradient(135deg, #ff9966, #ff5f9e);
-    --text: #f6f2ef;
-    --text-dim: #a79fc0;
-    --green: #5fd4a0;
-    --red: #ff6b6b;
-    --radius: 18px;
+    --bg: #140a26;
+    --panel: rgba(38, 26, 60, 0.55);
+    --panel-solid: #241834;
+    --panel-2: rgba(255,255,255,0.07);
+    --edge: rgba(255,255,255,0.13);
+    --edge-soft: rgba(255,255,255,0.07);
+    --amber: #ff77a9;
+    --amber-dim: #b98cff;
+    --amber-glow: rgba(185,140,255,0.35);
+    --accent-grad: linear-gradient(135deg, #ffb057 0%, #ff5f9e 52%, #a06bff 100%);
+    --text: #f7f3ff;
+    --text-dim: #b6acd6;
+    --green: #4fe0a8;
+    --red: #ff6b8a;
+    --radius: 22px;
     --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
   }
   *{ box-sizing: border-box; }
   html,body{ margin:0; padding:0; }
   body{
     background: var(--bg);
-    background-image:
-      radial-gradient(circle at 12% 8%, rgba(255,153,102,0.14), transparent 45%),
-      radial-gradient(circle at 90% 15%, rgba(255,95,158,0.1), transparent 45%),
-      radial-gradient(circle at 80% 95%, rgba(255,153,102,0.08), transparent 45%);
     color: var(--text);
     font-family: 'Rubik', sans-serif;
     min-height: 100vh;
-    padding: 32px 16px 80px;
+    padding: 32px 16px 90px;
+    position: relative;
+  }
+  /* Colorful glow backdrop that the frosted cards float over. */
+  body::before{
+    content:""; position:fixed; inset:-15%; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(38% 40% at 14% 10%, rgba(255,95,158,0.42), transparent 62%),
+      radial-gradient(42% 42% at 88% 8%, rgba(160,107,255,0.40), transparent 62%),
+      radial-gradient(46% 46% at 82% 88%, rgba(255,160,80,0.32), transparent 62%),
+      radial-gradient(44% 46% at 8% 92%, rgba(90,130,255,0.34), transparent 62%),
+      linear-gradient(165deg, #1b0f33 0%, #221041 45%, #2a1038 100%);
+    filter: saturate(1.1);
   }
   .wrap{ max-width: 760px; margin: 0 auto; }
 
-  header{ margin-bottom: 26px; }
+  header{ margin-bottom: 28px; }
   .eyebrow{
     font-family: 'Rubik', sans-serif;
     font-weight: 600;
     font-size: 12.5px;
     letter-spacing: 0.02em;
-    color: var(--amber);
-    display:flex; align-items:center; gap: 8px;
-    margin-bottom: 12px;
+    color: var(--text);
+    display:inline-flex; align-items:center; gap: 8px;
+    padding: 7px 15px 7px 13px; border-radius: 999px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid var(--edge);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    margin-bottom: 16px;
   }
   .eyebrow::before{
     content:""; width: 8px; height:8px; border-radius:50%;
     background: var(--accent-grad); display:inline-block;
-    box-shadow: 0 0 10px var(--amber-glow);
+    box-shadow: 0 0 12px rgba(255,95,158,0.8);
     animation: recPulse 2s ease-in-out infinite;
   }
   @keyframes recPulse{
     0%, 100%{ transform: scale(1); opacity:1; }
-    50%{ transform: scale(1.25); opacity:.7; }
+    50%{ transform: scale(1.3); opacity:.65; }
   }
   h1{
     font-family: 'Rubik', sans-serif;
     font-weight: 900;
-    font-size: clamp(32px, 7vw, 48px);
-    margin: 0 0 10px;
+    font-size: clamp(34px, 7.5vw, 52px);
+    margin: 0 0 12px;
     letter-spacing: -0.02em;
   }
   h1 span{
     background: var(--accent-grad);
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 22px rgba(255,95,158,0.45));
   }
   .sub{
     color: var(--text-dim);
@@ -95,14 +109,21 @@
   }
 
   section{
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 40%), var(--panel);
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 45%), var(--panel);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
     border: 1px solid var(--edge);
-    border-top-color: var(--edge-soft);
+    border-top-color: rgba(255,255,255,0.22);
     border-radius: var(--radius);
     padding: 22px;
     margin-bottom: 18px;
-    box-shadow: 0 1px 0 var(--edge-soft) inset, 0 8px 24px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.18);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 14px 40px rgba(12,4,28,0.42);
     transition: box-shadow .2s, transform .2s;
+    animation: reveal .5s var(--ease-bounce) both;
+  }
+  @keyframes reveal{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: none; }
   }
   .step{ position:relative; overflow:hidden; }
   .step::before{
@@ -206,12 +227,12 @@
   }
   .dropzone:hover{
     border-color: var(--amber-dim);
-    background: rgba(255,138,101,0.06);
+    background: rgba(255,95,158,0.09);
     transform: scale(1.005);
   }
   .dropzone.drag{
     border-color: var(--amber);
-    background: rgba(255,138,101,0.09);
+    background: rgba(255,95,158,0.14);
     transform: scale(1.01);
   }
   .dropzone:active{ transform: scale(.995); }
@@ -404,7 +425,7 @@
     -webkit-appearance:none; appearance:none;
     width:18px; height:18px; border-radius:50%;
     background: var(--accent-grad);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.35), 0 0 0 3px rgba(255,138,101,0.15);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35), 0 0 0 3px rgba(185,140,255,0.2);
     cursor:pointer;
   }
   input[type=range]::-moz-range-thumb{
@@ -454,7 +475,7 @@
     cursor: pointer;
   }
   .seg{ border-radius: 10px; }
-  .seg:hover{ background: rgba(255,138,101,0.08); }
+  .seg:hover{ background: rgba(255,95,158,0.1); }
   .seg .tc{
     font-family: 'IBM Plex Mono', monospace;
     color: var(--amber-dim);
